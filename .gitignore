@@ -141,3 +141,6 @@ build
 .idea
 plugins/**/.creds.json
 plugins/**/creds.json
+
+# Bun
+bun.lockb
