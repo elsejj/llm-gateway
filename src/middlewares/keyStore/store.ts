@@ -1,44 +1,44 @@
-import fs from 'fs'
+import fs from 'fs';
 import path from 'path';
-import { AZURE_OPEN_AI, BEDROCK, GOOGLE_VERTEX_AI, HEADER_KEYS, POWERED_BY } from '../../globals';
-
+import {
+  AZURE_OPEN_AI,
+  BEDROCK,
+  GOOGLE_VERTEX_AI,
+  HEADER_KEYS,
+  POWERED_BY,
+} from '../../globals';
 
 const KEY_STORE_FILE = process.env.LLM_GATEWAY_KEY_STORE_FILE || 'llmkeys.json';
 
-
-
 type KeyItem = {
-  apiKey: string
-}
+  apiKey: string;
+};
 
 type AzureOpenAIKeyItem = {
-  resourceName: string,
-  deploymentId: string,
-  apiVersion: string,
-  modelName: string,
-} & KeyItem
+  resourceName: string;
+  deploymentId: string;
+  apiVersion: string;
+  modelName: string;
+} & KeyItem;
 
 type BedrockKeyItem = {
-  accessKey: string,
-  accessId: string,
-  region: string,
-} & KeyItem
+  accessKey: string;
+  accessId: string;
+  region: string;
+} & KeyItem;
 
 type VertexKeyItem = {
   region: string;
   projectId: string;
   serviceAccountJson: Record<string, any>;
-} & KeyItem
-
-
+} & KeyItem;
 
 type AllKeyItem = {
-  'azure-openai': AzureOpenAIKeyItem[],
-  'bedrock': BedrockKeyItem[],
-  'vertex-ai': VertexKeyItem[],
-  [key: string]: KeyItem[],
-}
-
+  'azure-openai': AzureOpenAIKeyItem[];
+  bedrock: BedrockKeyItem[];
+  'vertex-ai': VertexKeyItem[];
+  [key: string]: KeyItem[];
+};
 
 class WithRoundRobin<T> {
   private items: T[];
@@ -51,7 +51,7 @@ class WithRoundRobin<T> {
 
   get next(): T | undefined {
     if (this.items.length === 0) {
-      return undefined
+      return undefined;
     }
     const item = this.items[this.index];
     this.index = (this.index + 1) % this.items.length;
@@ -59,35 +59,34 @@ class WithRoundRobin<T> {
   }
 }
 
-
 type KeyStore = {
   'azure-openai': {
-    [key: string]: WithRoundRobin<AzureOpenAIKeyItem>
-  },
-  'bedrock': WithRoundRobin<BedrockKeyItem>,
-  'vertex-ai': WithRoundRobin<VertexKeyItem>,
-  [key: string]: WithRoundRobin<KeyItem> | Record<string, WithRoundRobin<KeyItem>>
-}
-
+    [key: string]: WithRoundRobin<AzureOpenAIKeyItem>;
+  };
+  bedrock: WithRoundRobin<BedrockKeyItem>;
+  'vertex-ai': WithRoundRobin<VertexKeyItem>;
+  [key: string]:
+    | WithRoundRobin<KeyItem>
+    | Record<string, WithRoundRobin<KeyItem>>;
+};
 
 let keyStore: KeyStore = {
   'azure-openai': {},
-  'bedrock': new WithRoundRobin([]),
+  bedrock: new WithRoundRobin([]),
   'vertex-ai': new WithRoundRobin([]),
 };
 
 function buildStore(key: string, data: any[]): any {
-
   switch (key) {
     case AZURE_OPEN_AI: {
       const v = data.reduce((acc, item) => {
-        const found = acc[item.modelName]
+        const found = acc[item.modelName];
         if (!found) {
-          acc[item.modelName] = [item]
+          acc[item.modelName] = [item];
         } else {
           found.push(item);
         }
-        return acc
+        return acc;
       }, {});
       const d: Record<string, WithRoundRobin<AzureOpenAIKeyItem>> = {};
       for (const modelName of Object.keys(v)) {
@@ -96,21 +95,19 @@ function buildStore(key: string, data: any[]): any {
       return d;
     }
     case BEDROCK:
-    case GOOGLE_VERTEX_AI:
-      {
-        const d = data.flatMap((item) => {
-          const regions = item.region as string
-          return regions.split(',').map(region => {
-            return { ...item, region };
-          })
-        })
-        return new WithRoundRobin(d);
-      }
+    case GOOGLE_VERTEX_AI: {
+      const d = data.flatMap((item) => {
+        const regions = item.region as string;
+        return regions.split(',').map((region) => {
+          return { ...item, region };
+        });
+      });
+      return new WithRoundRobin(d);
+    }
     default:
       return new WithRoundRobin(data);
   }
 }
-
 
 function loadKeyStore(filename: string) {
   try {
@@ -125,7 +122,6 @@ function loadKeyStore(filename: string) {
   }
 }
 
-
 // get absolute path of key store file, and watch the file
 const absKeyStoreFile = path.resolve(KEY_STORE_FILE);
 const storeFileDir = path.dirname(absKeyStoreFile);
@@ -134,15 +130,14 @@ fs.watch(storeFileDir, null, (event, filename) => {
   if (filename === storeFileName) {
     loadKeyStore(filename);
   }
-})
+});
 
 loadKeyStore(absKeyStoreFile);
 
-
-
-export function setHeaderByKeyStore(requestHeaders: Record<string, any>): boolean {
-
-  const provider = requestHeaders.get(HEADER_KEYS.PROVIDER)
+export function setHeaderByKeyStore(
+  requestHeaders: Record<string, any>
+): boolean {
+  const provider = requestHeaders.get(HEADER_KEYS.PROVIDER);
   if (!provider) {
     return false;
   }
@@ -154,53 +149,64 @@ export function setHeaderByKeyStore(requestHeaders: Record<string, any>): boolea
 
   switch (provider) {
     case AZURE_OPEN_AI: {
-      const modelName = requestHeaders.get(`x-${POWERED_BY}-azure-model-name`)
+      const modelName = requestHeaders.get(`x-${POWERED_BY}-azure-model-name`);
       if (!modelName) {
         return false;
       }
-      const azStore = store as { [key: string]: WithRoundRobin<AzureOpenAIKeyItem> }
+      const azStore = store as {
+        [key: string]: WithRoundRobin<AzureOpenAIKeyItem>;
+      };
       const item = azStore[modelName]?.next;
       if (!item) {
         return false;
       }
-      requestHeaders.set(`x-${POWERED_BY}-azure-resource-name`, item.resourceName);
-      requestHeaders.set(`x-${POWERED_BY}-azure-deployment-id`, item.deploymentId);
+      requestHeaders.set(
+        `x-${POWERED_BY}-azure-resource-name`,
+        item.resourceName
+      );
+      requestHeaders.set(
+        `x-${POWERED_BY}-azure-deployment-id`,
+        item.deploymentId
+      );
       requestHeaders.set(`x-${POWERED_BY}-azure-api-version`, item.apiVersion);
       requestHeaders.set(`x-${POWERED_BY}-azure-model-name`, item.modelName);
       requestHeaders.set('authorization', `Bearer ${item.apiKey}`);
       return true;
     }
-    case BEDROCK:
-      {
-        const item = store.next as BedrockKeyItem;
-        if (!item) {
-          return false;
-        }
-        requestHeaders.set(`x-${POWERED_BY}-aws-access-key-id`, item.accessId);
-        requestHeaders.set(`x-${POWERED_BY}-aws-secret-access-key`, item.accessKey);
-        requestHeaders.set(`x-${POWERED_BY}-aws-region`, item.region);
-        requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
-        return true;
+    case BEDROCK: {
+      const item = store.next as BedrockKeyItem;
+      if (!item) {
+        return false;
       }
-    case GOOGLE_VERTEX_AI:
-      {
-        const item = store.next as VertexKeyItem;
-        if (!item) {
-          return false;
-        }
-        requestHeaders.set(`x-${POWERED_BY}-vertex-project-id`, item.projectId);
-        requestHeaders.set(`x-${POWERED_BY}-vertex-region`, item.region);
-        requestHeaders.set(`x-${POWERED_BY}-vertex-service-account-json`, JSON.stringify(item.serviceAccountJson));
-        requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
+      requestHeaders.set(`x-${POWERED_BY}-aws-access-key-id`, item.accessId);
+      requestHeaders.set(
+        `x-${POWERED_BY}-aws-secret-access-key`,
+        item.accessKey
+      );
+      requestHeaders.set(`x-${POWERED_BY}-aws-region`, item.region);
+      requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
+      return true;
+    }
+    case GOOGLE_VERTEX_AI: {
+      const item = store.next as VertexKeyItem;
+      if (!item) {
+        return false;
       }
-    default:
-      {
-        const item = store.next as KeyItem;
-        if (!item) {
-          return false;
-        }
-        requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
-        return true;
+      requestHeaders.set(`x-${POWERED_BY}-vertex-project-id`, item.projectId);
+      requestHeaders.set(`x-${POWERED_BY}-vertex-region`, item.region);
+      requestHeaders.set(
+        `x-${POWERED_BY}-vertex-service-account-json`,
+        JSON.stringify(item.serviceAccountJson)
+      );
+      requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
+    }
+    default: {
+      const item = store.next as KeyItem;
+      if (!item) {
+        return false;
       }
+      requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
+      return true;
+    }
   }
 }

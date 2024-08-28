@@ -1,21 +1,17 @@
-
-
-
 type ApiKey = {
   header: string;
   version: number;
   expireAt: number;
 };
 
-
 /**
  * decode api key from buffer
- * 
+ *
  * the api key format is:
  * - 2 bytes header: 'JJ'
  * - 2 bytes version: 1
  * - 4 bytes expireAt: unix timestamp
- * 
+ *
  * @param apiKey plain api key buffer
  * @returns  decoded api key
  */
@@ -42,7 +38,7 @@ function decodeApiKey(apiKey: Buffer): ApiKey {
 
 /**
  * make api key buffer
- * 
+ *
  * @param version api key version
  * @param expireAt expire at unix timestamp
  * @returns api key buffer
@@ -57,25 +53,36 @@ function makeApiKeyV1(version: number, expireAt: number): Buffer {
 
 /**
  * decrypt api key with master key
- * 
+ *
  * @param apiKey encrypted api key
  * @param masterKey master key
  * @returns decrypted api key
  * @throws error if api key is invalid
  */
-export async function decryptApiKey(apiKey: string, masterKey: string): Promise<ApiKey> {
+export async function decryptApiKey(
+  apiKey: string,
+  masterKey: string
+): Promise<ApiKey> {
   const apiKeyBuf = Buffer.from(apiKey, 'base64');
   if (apiKeyBuf.length < 16) {
     throw new Error('Invalid api key');
   }
 
-  const hashedMasterKey = Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(masterKey)));
+  const hashedMasterKey = Buffer.from(
+    await crypto.subtle.digest('SHA-256', new TextEncoder().encode(masterKey))
+  );
   const iv = new Uint8Array(16);
   iv.set(apiKeyBuf.subarray(0, 8), 0);
   for (let i = 0; i < 8; i++) {
     iv[i + 8] = apiKeyBuf[i] ^ hashedMasterKey[i];
   }
-  const key = await crypto.subtle.importKey('raw', hashedMasterKey.subarray(16), 'AES-GCM', false, ['decrypt']);
+  const key = await crypto.subtle.importKey(
+    'raw',
+    hashedMasterKey.subarray(16),
+    'AES-GCM',
+    false,
+    ['decrypt']
+  );
   // do aes decrypt to apiKey with master key
   const decryptedApiKey = await crypto.subtle.decrypt(
     { name: 'AES-GCM', iv },
@@ -88,33 +95,44 @@ export async function decryptApiKey(apiKey: string, masterKey: string): Promise<
 
 /**
  * generate api key with master key
- * 
+ *
  * the encrypted api key format is:
  * - 8 bytes iv
  * - encrypted api key
- * 
+ *
  * the encrypt logic is:
  * - create a 16 bytes iv
  * - first 8 bytes of iv is random
  * - fill the rest of iv with hashed master key xor with first 8 bytes of iv
  * - use the half of hashed master key as aes key
  * - use aes-gcm to encrypt api key
- * 
- * @param expireDuration 
- * @param masterKey 
- * @returns 
+ *
+ * @param expireDuration
+ * @param masterKey
+ * @returns
  */
-export async function generateApiKey(expireDuration: number, masterKey: string): Promise<string> {
+export async function generateApiKey(
+  expireDuration: number,
+  masterKey: string
+): Promise<string> {
   const expireAt = Math.floor(Date.now() / 1000) + expireDuration;
   const apiKey = makeApiKeyV1(1, expireAt);
-  const hashedMasterKey = Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(masterKey)));
+  const hashedMasterKey = Buffer.from(
+    await crypto.subtle.digest('SHA-256', new TextEncoder().encode(masterKey))
+  );
   const ivBase = crypto.getRandomValues(new Uint8Array(8));
   const iv = new Uint8Array(16);
   iv.set(ivBase, 0);
   for (let i = 0; i < 8; i++) {
     iv[i + 8] = ivBase[i] ^ hashedMasterKey[i];
   }
-  const key = await crypto.subtle.importKey('raw', hashedMasterKey.slice(16), 'AES-GCM', false, ['encrypt']);
+  const key = await crypto.subtle.importKey(
+    'raw',
+    hashedMasterKey.slice(16),
+    'AES-GCM',
+    false,
+    ['encrypt']
+  );
   // do aes encrypt to apiKey with master key
   const encryptedApiKey = await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv },
@@ -129,7 +147,7 @@ export async function generateApiKey(expireDuration: number, masterKey: string):
 
 /**
  * verify input api key is valid
- * @param apiKey 
+ * @param apiKey
  * @returns api key is valid or not
  */
 export async function verifyApiKey(apiKey: string | null): Promise<boolean> {
@@ -146,9 +164,9 @@ export async function verifyApiKey(apiKey: string | null): Promise<boolean> {
     if (parsedApiKey.expireAt < Date.now() / 1000) {
       throw new Error('Api key expired');
     }
-    return true
+    return true;
   } catch (e) {
-    console.error("verifyApiKey failed", e);
-    return false
+    console.error('verifyApiKey failed', e);
+    return false;
   }
 }

@@ -1,6 +1,8 @@
-import exp from "constants";
-import { decryptApiKey, generateApiKey } from "../../middlewares/keyStore/verifyApiKey";
-
+import exp from 'constants';
+import {
+  decryptApiKey,
+  generateApiKey,
+} from '../../middlewares/keyStore/verifyApiKey';
 
 test('key create/parse', async () => {
   const master = 'master';
@@ -17,4 +19,4 @@ test('key create/parse', async () => {
   expect(apiKey2.expireAt).toBeGreaterThan(Math.floor(Date.now() / 1000));
   expect(apiKey2.version).toBe(1);
   expect(apiKey2.header).toBe('JJ');
-})
+});
