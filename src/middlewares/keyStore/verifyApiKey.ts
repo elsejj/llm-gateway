@@ -150,7 +150,9 @@ export async function generateApiKey(
  * @param apiKey
  * @returns api key is valid or not
  */
-export async function verifyApiKey(apiKey: string | null): Promise<boolean> {
+export async function verifyApiKey(
+  apiKey: string | undefined
+): Promise<boolean> {
   try {
     const masterKey = process.env.LLM_GATEWAY_MASTER_KEY;
     if (!masterKey) {
@@ -162,11 +164,10 @@ export async function verifyApiKey(apiKey: string | null): Promise<boolean> {
     }
     const parsedApiKey = await decryptApiKey(apiKey, masterKey);
     if (parsedApiKey.expireAt < Date.now() / 1000) {
-      throw new Error('Api key expired');
+      return false;
     }
     return true;
   } catch (e) {
-    console.error('verifyApiKey failed', e);
     return false;
   }
 }

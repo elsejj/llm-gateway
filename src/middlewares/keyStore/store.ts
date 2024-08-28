@@ -135,7 +135,8 @@ fs.watch(storeFileDir, null, (event, filename) => {
 loadKeyStore(absKeyStoreFile);
 
 export function setHeaderByKeyStore(
-  requestHeaders: Record<string, any>
+  requestHeaders: Record<string, any>,
+  modelRequest: string | undefined
 ): boolean {
   const provider = requestHeaders.get(HEADER_KEYS.PROVIDER);
   if (!provider) {
@@ -149,7 +150,10 @@ export function setHeaderByKeyStore(
 
   switch (provider) {
     case AZURE_OPEN_AI: {
-      const modelName = requestHeaders.get(`x-${POWERED_BY}-azure-model-name`);
+      const modelName =
+        modelRequest ||
+        requestHeaders.get(`x-${POWERED_BY}-azure-model-name`) ||
+        '';
       if (!modelName) {
         return false;
       }

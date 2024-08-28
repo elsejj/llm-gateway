@@ -6,7 +6,7 @@ import {
 
 test('key create/parse', async () => {
   const master = 'master';
-  const expireDuration = 60 * 60 * 24;
+  const expireDuration = 60 * 60 * 24 * 1000;
 
   const apiKey1 = await generateApiKey(expireDuration, master);
 
