@@ -144,3 +144,10 @@ plugins/**/creds.json
 
 # Bun
 bun.lockb
+
+# vscode settings
+.vscode
+
+# llm keys
+llmkeys.json
+

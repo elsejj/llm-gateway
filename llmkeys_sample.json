@@ -1,0 +1,25 @@
+{
+  "azure-openai": [
+    {
+      "apiKey": "",
+      "resourceName": "",
+      "deploymentId": "",
+      "apiVersion": "",
+      "modelName": ""
+    }
+  ],
+  "bedrock": [
+    {
+      "accessKey": "",
+      "accessId": "",
+      "region": ""
+    }
+  ],
+  "vertex-ai": [
+    {
+      "region": "",
+      "projectId": "",
+      "serviceAccountJson": ""
+    }
+  ]
+}

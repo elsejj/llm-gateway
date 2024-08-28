@@ -23,6 +23,7 @@ import { compress } from 'hono/compress';
 import { getRuntimeKey } from 'hono/adapter';
 import { imageGenerationsHandler } from './handlers/imageGenerationsHandler';
 import conf from '../conf.json';
+import { keyStore } from './middlewares/keyStore';
 
 // Create a new Hono server instance
 const app = new Hono();
@@ -46,6 +47,9 @@ app.use('*', (c, next) => {
  * Returns a greeting message.
  */
 app.get('/', (c) => c.text('AI Gateway says hey!'));
+
+// Use keyStore middleware for all routes
+app.use('*', keyStore());
 
 // Use prettyJSON middleware for all routes
 app.use('*', prettyJSON());

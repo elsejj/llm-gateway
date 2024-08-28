@@ -902,6 +902,9 @@ export async function tryTargetsRecursively(
         );
       } catch (error: any) {
         response = error.response;
+        if (!response) {
+          throw error;
+        }
       }
       break;
   }
@@ -1218,9 +1221,9 @@ async function cacheHandler(
   return {
     cacheResponse: !!cacheResponse
       ? new Response(responseBody, {
-          headers: { 'content-type': 'application/json' },
-          status: responseStatus,
-        })
+        headers: { 'content-type': 'application/json' },
+        status: responseStatus,
+      })
       : undefined,
     cacheStatus,
     cacheKey,
