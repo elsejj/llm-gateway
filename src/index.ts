@@ -19,13 +19,13 @@ import { completionsHandler } from './handlers/completionsHandler';
 import { embeddingsHandler } from './handlers/embeddingsHandler';
 import { requestValidator } from './middlewares/requestValidator';
 import { hooks } from './middlewares/hooks';
+import { keyStore } from './middlewares/keyStore';
 import { compress } from 'hono/compress';
 import { getRuntimeKey } from 'hono/adapter';
 import { imageGenerationsHandler } from './handlers/imageGenerationsHandler';
 import { memoryCache } from './middlewares/cache';
 import { createSpeechHandler } from './handlers/createSpeechHandler';
 import conf from '../conf.json';
-import { keyStore } from './middlewares/keyStore';
 import { createTranscriptionHandler } from './handlers/createTranscriptionHandler';
 import { createTranslationHandler } from './handlers/createTranslationHandler';
 
