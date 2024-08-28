@@ -119,7 +119,7 @@ function loadKeyStore(filename: string) {
     for (const key in data) {
       keyStore[key] = buildStore(key, data[key]);
     }
-
+    console.log(`key store file ${filename} loaded`);
   } catch (e) {
     console.error(`cannot load key store file ${filename}: ${e}`);
   }
