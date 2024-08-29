@@ -4,7 +4,7 @@
  * @module index
  */
 
-import { Hono } from 'hono';
+import { Hono, MiddlewareHandler } from 'hono';
 import { prettyJSON } from 'hono/pretty-json';
 import { HTTPException } from 'hono/http-exception';
 // import { env } from 'hono/adapter' // Have to set this up for multi-environment deployment
@@ -38,14 +38,20 @@ const app = new Hono();
  * This check if its not any of the 2 and then applies the compress middleware to avoid double compression.
  */
 
+function bunCompress(): MiddlewareHandler {
+  return async (ctx, next) => {
+    await next();
+    // reply plain text responses
+    ctx.res.headers.delete('Content-Encoding');
+  };
+}
+
 app.use('*', (c, next) => {
   const runtime = getRuntimeKey();
-  if (
-    runtime !== 'lagon' &&
-    runtime !== 'workerd' &&
-    runtime !== 'node' &&
-    runtime !== 'bun'
-  ) {
+  if (runtime === 'bun') {
+    return bunCompress()(c, next);
+  }
+  if (runtime !== 'lagon' && runtime !== 'workerd' && runtime !== 'node') {
     return compress()(c, next);
   }
   return next();

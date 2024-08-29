@@ -3,6 +3,7 @@ import path from 'path';
 import {
   AZURE_OPEN_AI,
   BEDROCK,
+  DOUBAO,
   GOOGLE_VERTEX_AI,
   HEADER_KEYS,
   POWERED_BY,
@@ -33,10 +34,16 @@ type VertexKeyItem = {
   serviceAccountJson: Record<string, any>;
 } & KeyItem;
 
+type DouBaoKeyItem = {
+  apiKey: string;
+  models: { [key: string]: string };
+} & KeyItem;
+
 type AllKeyItem = {
   'azure-openai': AzureOpenAIKeyItem[];
   bedrock: BedrockKeyItem[];
   'vertex-ai': VertexKeyItem[];
+  doubao: DouBaoKeyItem[];
   [key: string]: KeyItem[];
 };
 
@@ -65,6 +72,7 @@ type KeyStore = {
   };
   bedrock: WithRoundRobin<BedrockKeyItem>;
   'vertex-ai': WithRoundRobin<VertexKeyItem>;
+  doubao: WithRoundRobin<DouBaoKeyItem>;
   [key: string]:
     | WithRoundRobin<KeyItem>
     | Record<string, WithRoundRobin<KeyItem>>;
@@ -74,6 +82,7 @@ let keyStore: KeyStore = {
   'azure-openai': {},
   bedrock: new WithRoundRobin([]),
   'vertex-ai': new WithRoundRobin([]),
+  doubao: new WithRoundRobin([]),
 };
 
 function buildStore(key: string, data: any[]): any {
@@ -203,6 +212,19 @@ export function setHeaderByKeyStore(
         JSON.stringify(item.serviceAccountJson)
       );
       requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
+    }
+    case DOUBAO: {
+      const item = store.next as DouBaoKeyItem;
+      if (!item) {
+        return false;
+      }
+      requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
+      if (!modelRequest) {
+        return false;
+      }
+      const realModelName = item.models[modelRequest] || modelRequest;
+      requestHeaders.set(`x-${POWERED_BY}-doubao-model-name`, realModelName);
+      return true;
     }
     default: {
       const item = store.next as KeyItem;

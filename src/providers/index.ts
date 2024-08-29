@@ -36,6 +36,7 @@ import QWenConfig from './qwen';
 import DeepbricksConfig from './deepbricks';
 import SiliconFlowConfig from './siliconflow';
 import HuggingfaceConfig from './huggingface';
+import DouBaoConfig from './doubao';
 
 const Providers: { [key: string]: ProviderConfigs } = {
   openai: OpenAIConfig,
@@ -75,6 +76,7 @@ const Providers: { [key: string]: ProviderConfigs } = {
   qwen: QWenConfig,
   deepbricks: DeepbricksConfig,
   siliconflow: SiliconFlowConfig,
+  doubao: DouBaoConfig,
 };
 
 export default Providers;

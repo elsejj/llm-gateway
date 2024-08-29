@@ -13,6 +13,7 @@ import {
   MULTIPART_FORM_DATA_ENDPOINTS,
   CONTENT_TYPES,
   HUGGING_FACE,
+  DOUBAO,
 } from '../globals';
 import Providers from '../providers';
 import { ProviderAPIConfig, endpointStrings } from '../providers/types';
@@ -1007,6 +1008,11 @@ export function constructConfigFromRequestHeaders(
     anthropicBeta: requestHeaders[`x-${POWERED_BY}-anthropic-beta`],
     anthropicVersion: requestHeaders[`x-${POWERED_BY}-anthropic-version`],
   };
+  const doubaoConfig = {
+    overrideParams: {
+      model: requestHeaders[`x-${POWERED_BY}-doubao-model-name`],
+    },
+  };
 
   let vertexServiceAccountJson =
     requestHeaders[`x-${POWERED_BY}-vertex-service-account-json`];
@@ -1104,6 +1110,7 @@ export function constructConfigFromRequestHeaders(
       anthropicConfig),
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === HUGGING_FACE &&
       huggingfaceConfig),
+    ...(requestHeaders[`x-${POWERED_BY}-provider`] === DOUBAO && doubaoConfig),
   };
 }
 

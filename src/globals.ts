@@ -65,6 +65,7 @@ export const VOYAGE: string = 'voyage';
 export const QWEN = 'qwen';
 export const DEEPBRICKS: string = 'deepbricks';
 export const SILICONFLOW: string = 'siliconflow';
+export const DOUBAO = 'doubao';
 
 export const VALID_PROVIDERS = [
   ANTHROPIC,
@@ -104,6 +105,7 @@ export const VALID_PROVIDERS = [
   DEEPBRICKS,
   SILICONFLOW,
   HUGGING_FACE,
+  DOUBAO,
 ];
 
 export const CONTENT_TYPES = {
