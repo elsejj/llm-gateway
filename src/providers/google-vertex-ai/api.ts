@@ -21,6 +21,13 @@ const getProjectRoute = (
   return `/${routeVersion}/projects/${projectId}/locations/${vertexRegion}`;
 };
 
+let cachedSAToken: {
+  [key: string]: {
+    token: string;
+    expireAt: number;
+  }
+} = {};
+
 // Good reference for using REST: https://cloud.google.com/vertex-ai/generative-ai/docs/start/quickstarts/quickstart-multimodal#gemini-beginner-samples-drest
 // Difference versus Studio AI: https://cloud.google.com/vertex-ai/docs/start/ai-platform-users
 export const GoogleApiConfig: ProviderAPIConfig = {
@@ -29,11 +36,22 @@ export const GoogleApiConfig: ProviderAPIConfig = {
 
     return `https://${vertexRegion}-aiplatform.googleapis.com`;
   },
+  //@ts-ignore
   headers: async ({ providerOptions }) => {
     const { apiKey, vertexServiceAccountJson } = providerOptions;
     let authToken = apiKey;
     if (vertexServiceAccountJson) {
-      authToken = await getAccessToken(vertexServiceAccountJson);
+      const cacheToken = cachedSAToken[vertexServiceAccountJson.private_key_id];
+      const now = Math.floor(Date.now() / 1000);
+      if (cacheToken && cacheToken.expireAt > now) {
+        authToken = cacheToken.token;
+      } else {
+        authToken = await getAccessToken(vertexServiceAccountJson);
+        cachedSAToken[vertexServiceAccountJson.private_key_id] = {
+          token: authToken,
+          expireAt: now + 3500,
+        };
+      }
     }
 
     return {
