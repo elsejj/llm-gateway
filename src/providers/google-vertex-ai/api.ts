@@ -25,7 +25,7 @@ let cachedSAToken: {
   [key: string]: {
     token: string;
     expireAt: number;
-  }
+  };
 } = {};
 
 // Good reference for using REST: https://cloud.google.com/vertex-ai/generative-ai/docs/start/quickstarts/quickstart-multimodal#gemini-beginner-samples-drest
