@@ -37,6 +37,7 @@ export const PALM: string = 'palm';
 export const TOGETHER_AI: string = 'together-ai';
 export const GOOGLE: string = 'google';
 export const GOOGLE_VERTEX_AI: string = 'vertex-ai';
+export const HUGGING_FACE: string = 'huggingface';
 export const PERPLEXITY_AI: string = 'perplexity-ai';
 export const REKA_AI: string = 'reka-ai';
 export const MISTRAL_AI: string = 'mistral-ai';
@@ -59,8 +60,11 @@ export const NOVITA_AI: string = 'novita-ai';
 export const MONSTERAPI: string = 'monsterapi';
 export const DEEPSEEK: string = 'deepseek';
 export const PREDIBASE: string = 'predibase';
+export const TRITON: string = 'triton';
 export const VOYAGE: string = 'voyage';
 export const QWEN = 'qwen';
+export const DEEPBRICKS: string = 'deepbricks';
+export const SILICONFLOW: string = 'siliconflow';
 
 export const VALID_PROVIDERS = [
   ANTHROPIC,
@@ -94,8 +98,12 @@ export const VALID_PROVIDERS = [
   MONSTERAPI,
   DEEPSEEK,
   PREDIBASE,
+  TRITON,
   VOYAGE,
   QWEN,
+  DEEPBRICKS,
+  SILICONFLOW,
+  HUGGING_FACE,
 ];
 
 export const CONTENT_TYPES = {

@@ -9,8 +9,10 @@ import {
   RETRY_STATUS_CODES,
   GOOGLE_VERTEX_AI,
   OPEN_AI,
+  ANTHROPIC,
   MULTIPART_FORM_DATA_ENDPOINTS,
   CONTENT_TYPES,
+  HUGGING_FACE,
 } from '../globals';
 import Providers from '../providers';
 import { ProviderAPIConfig, endpointStrings } from '../providers/types';
@@ -992,9 +994,18 @@ export function constructConfigFromRequestHeaders(
     openaiProject: requestHeaders[`x-${POWERED_BY}-openai-project`],
   };
 
+  const huggingfaceConfig = {
+    huggingfaceBaseUrl: requestHeaders[`x-${POWERED_BY}-huggingface-base-url`],
+  };
+
   const vertexConfig: Record<string, any> = {
     vertexProjectId: requestHeaders[`x-${POWERED_BY}-vertex-project-id`],
     vertexRegion: requestHeaders[`x-${POWERED_BY}-vertex-region`],
+  };
+
+  const anthropicConfig = {
+    anthropicBeta: requestHeaders[`x-${POWERED_BY}-anthropic-beta`],
+    anthropicVersion: requestHeaders[`x-${POWERED_BY}-anthropic-version`],
   };
 
   let vertexServiceAccountJson =
@@ -1047,10 +1058,24 @@ export function constructConfigFromRequestHeaders(
         };
       }
 
+      if (parsedConfigJson.provider === HUGGING_FACE) {
+        parsedConfigJson = {
+          ...parsedConfigJson,
+          ...huggingfaceConfig,
+        };
+      }
+
       if (parsedConfigJson.provider === GOOGLE_VERTEX_AI) {
         parsedConfigJson = {
           ...parsedConfigJson,
           ...vertexConfig,
+        };
+      }
+
+      if (parsedConfigJson.provider === ANTHROPIC) {
+        parsedConfigJson = {
+          ...parsedConfigJson,
+          ...anthropicConfig,
         };
       }
     }
@@ -1075,6 +1100,10 @@ export function constructConfigFromRequestHeaders(
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === GOOGLE_VERTEX_AI &&
       vertexConfig),
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === OPEN_AI && openAiConfig),
+    ...(requestHeaders[`x-${POWERED_BY}-provider`] === ANTHROPIC &&
+      anthropicConfig),
+    ...(requestHeaders[`x-${POWERED_BY}-provider`] === HUGGING_FACE &&
+      huggingfaceConfig),
   };
 }
 
