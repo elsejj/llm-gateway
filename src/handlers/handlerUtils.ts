@@ -9,6 +9,7 @@ import {
   RETRY_STATUS_CODES,
   GOOGLE_VERTEX_AI,
   OPEN_AI,
+  AZURE_AI_INFERENCE,
   ANTHROPIC,
   MULTIPART_FORM_DATA_ENDPOINTS,
   CONTENT_TYPES,
@@ -979,6 +980,16 @@ export function constructConfigFromRequestHeaders(
     azureModelName: requestHeaders[`x-${POWERED_BY}-azure-model-name`],
   };
 
+  const azureAiInferenceConfig = {
+    azureDeploymentName:
+      requestHeaders[`x-${POWERED_BY}-azure-deployment-name`],
+    azureRegion: requestHeaders[`x-${POWERED_BY}-azure-region`],
+    azureDeploymentType:
+      requestHeaders[`x-${POWERED_BY}-azure-deployment-type`],
+    azureApiVersion: requestHeaders[`x-${POWERED_BY}-azure-api-version`],
+    azureEndpointName: requestHeaders[`x-${POWERED_BY}-azure-endpoint-name`],
+  };
+
   const bedrockConfig = {
     awsAccessKeyId: requestHeaders[`x-${POWERED_BY}-aws-access-key-id`],
     awsSecretAccessKey: requestHeaders[`x-${POWERED_BY}-aws-secret-access-key`],
@@ -1078,6 +1089,12 @@ export function constructConfigFromRequestHeaders(
         };
       }
 
+      if (parsedConfigJson.provider === AZURE_AI_INFERENCE) {
+        parsedConfigJson = {
+          ...parsedConfigJson,
+          ...azureAiInferenceConfig,
+        };
+      }
       if (parsedConfigJson.provider === ANTHROPIC) {
         parsedConfigJson = {
           ...parsedConfigJson,
@@ -1105,6 +1122,8 @@ export function constructConfigFromRequestHeaders(
       workersAiConfig),
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === GOOGLE_VERTEX_AI &&
       vertexConfig),
+    ...(requestHeaders[`x-${POWERED_BY}-provider`] === AZURE_AI_INFERENCE &&
+      azureAiInferenceConfig),
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === OPEN_AI && openAiConfig),
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === ANTHROPIC &&
       anthropicConfig),
