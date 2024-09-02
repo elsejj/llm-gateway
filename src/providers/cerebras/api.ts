@@ -1,7 +1,7 @@
 import { ProviderAPIConfig } from '../types';
 
-const MonsterAPIApiConfig: ProviderAPIConfig = {
-  getBaseURL: () => 'https://llm.monsterapi.ai/v1',
+export const cerebrasAPIConfig: ProviderAPIConfig = {
+  getBaseURL: () => 'https://api.cerebras.ai/v1',
   headers: ({ providerOptions }) => {
     return { Authorization: `Bearer ${providerOptions.apiKey}` };
   },
@@ -14,5 +14,3 @@ const MonsterAPIApiConfig: ProviderAPIConfig = {
     }
   },
 };
-
-export default MonsterAPIApiConfig;
