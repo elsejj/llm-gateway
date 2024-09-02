@@ -5,7 +5,7 @@ import { serve } from '@hono/node-server';
 import app from './index';
 
 // Extract the port number from the command line arguments
-const defaultPort = process.env.LLM_GATEWAY_PORT || '8787'
+const defaultPort = process.env.LLM_GATEWAY_PORT || '8787';
 const defaultHost = process.env.LLM_GATEWAY_HOST || '127.0.0.1';
 const args = process.argv.slice(2);
 const portArg = args.find((arg) => arg.startsWith('--port='));

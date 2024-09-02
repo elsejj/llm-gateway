@@ -41,6 +41,10 @@ export const DeepSeekChatCompleteConfig: ProviderConfig = {
     param: 'stream',
     default: false,
   },
+  stream_options: {
+    param: 'stream_options',
+    default: null,
+  },
   frequency_penalty: {
     param: 'frequency_penalty',
     default: 0,

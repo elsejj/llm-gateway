@@ -212,6 +212,7 @@ export function setHeaderByKeyStore(
         JSON.stringify(item.serviceAccountJson)
       );
       requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
+      return true;
     }
     case DOUBAO: {
       const item = store.next as DouBaoKeyItem;
