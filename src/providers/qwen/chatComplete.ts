@@ -1,3 +1,4 @@
+import { boolean } from 'zod';
 import { QWEN } from '../../globals';
 
 import {
@@ -40,6 +41,10 @@ export const QWenChatCompleteConfig: ProviderConfig = {
   stream: {
     param: 'stream',
     default: false,
+  },
+  stream_options: {
+    param: 'stream_options',
+    default: null,
   },
   frequency_penalty: {
     param: 'frequency_penalty',
@@ -102,6 +107,11 @@ interface QWenStreamChunk {
     index: number;
     finish_reason: string | null;
   }[];
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
 }
 
 export const QWenChatCompleteResponseTransform: (
@@ -163,13 +173,14 @@ export const QWenChatCompleteStreamChunkTransform: (
       created: parsedChunk.created,
       model: parsedChunk.model,
       provider: QWEN,
-      choices: [
-        {
-          index: parsedChunk.choices[0].index,
-          delta: parsedChunk.choices[0].delta,
-          finish_reason: parsedChunk.choices[0].finish_reason,
-        },
-      ],
+      choices: parsedChunk.choices?.slice(0, 1).map((c) => {
+        return {
+          index: c.index,
+          delta: c.delta,
+          finish_reason: c.finish_reason,
+        };
+      }),
+      usage: parsedChunk.usage,
     })}` + '\n\n'
   );
 };

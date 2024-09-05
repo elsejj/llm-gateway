@@ -75,6 +75,11 @@ interface ZhipuStreamChunk {
     index: number;
     finish_reason: string | null;
   }[];
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
 }
 
 export const ZhipuChatCompleteResponseTransform: (
@@ -136,13 +141,14 @@ export const ZhipuChatCompleteStreamChunkTransform: (
       created: parsedChunk.created,
       model: parsedChunk.model,
       provider: ZHIPU,
-      choices: [
-        {
-          index: parsedChunk.choices[0].index,
-          delta: parsedChunk.choices[0].delta,
-          finish_reason: parsedChunk.choices[0].finish_reason,
-        },
-      ],
+      choices: parsedChunk.choices?.map((c) => {
+        return {
+          index: c.index,
+          delta: c.delta,
+          finish_reason: c.finish_reason,
+        };
+      }),
+      usage: parsedChunk.usage,
     })}` + '\n\n'
   );
 };
