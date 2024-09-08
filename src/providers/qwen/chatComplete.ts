@@ -24,7 +24,11 @@ export const QWenChatCompleteConfig: ProviderConfig = {
   max_tokens: {
     param: 'max_tokens',
     default: 100,
-    min: 0,
+    min: 1,
+    max: 2000,
+    transform: (value: number) => {
+      return Math.min(value, 2000);
+    },
   },
   temperature: {
     param: 'temperature',
