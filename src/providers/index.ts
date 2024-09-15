@@ -42,6 +42,8 @@ import SiliconFlowConfig from './siliconflow';
 import HuggingfaceConfig from './huggingface';
 import DouBaoConfig from './doubao';
 import { cerebrasProviderAPIConfig } from './cerebras';
+import { InferenceNetProviderConfigs } from './inference-net';
+import SambaNovaConfig from './sambanova';
 
 const Providers: { [key: string]: ProviderConfigs } = {
   openai: OpenAIConfig,
@@ -85,6 +87,8 @@ const Providers: { [key: string]: ProviderConfigs } = {
   siliconflow: SiliconFlowConfig,
   doubao: DouBaoConfig,
   cerebras: cerebrasProviderAPIConfig,
+  'inference-net': InferenceNetProviderConfigs,
+  sambanova: SambaNovaConfig,
 };
 
 export default Providers;

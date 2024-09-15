@@ -51,10 +51,11 @@ app.use('*', (c, next) => {
   if (runtime === 'bun') {
     return bunCompress()(c, next);
   }
-  if (runtime !== 'lagon' && runtime !== 'workerd' && runtime !== 'node') {
-    return compress()(c, next);
+  const runtimesThatDontNeedCompression = ['lagon', 'workerd', 'node'];
+  if (runtimesThatDontNeedCompression.includes(runtime)) {
+    return next();
   }
-  return next();
+  return compress()(c, next);
 });
 
 /**
