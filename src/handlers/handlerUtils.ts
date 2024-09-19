@@ -1130,6 +1130,8 @@ export function constructConfigFromRequestHeaders(
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === HUGGING_FACE &&
       huggingfaceConfig),
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === DOUBAO && doubaoConfig),
+    mistralFimCompletion:
+      requestHeaders[`x-${POWERED_BY}-mistral-fim-completion`],
   };
 }
 
