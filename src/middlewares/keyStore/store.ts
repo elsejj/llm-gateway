@@ -13,6 +13,7 @@ const KEY_STORE_FILE = process.env.LLM_GATEWAY_KEY_STORE_FILE || 'llmkeys.json';
 
 type KeyItem = {
   apiKey: string;
+  proxy?: string;
 };
 
 type AzureOpenAIKeyItem = {
@@ -74,8 +75,8 @@ type KeyStore = {
   'vertex-ai': WithRoundRobin<VertexKeyItem>;
   doubao: WithRoundRobin<DouBaoKeyItem>;
   [key: string]:
-    | WithRoundRobin<KeyItem>
-    | Record<string, WithRoundRobin<KeyItem>>;
+  | WithRoundRobin<KeyItem>
+  | Record<string, WithRoundRobin<KeyItem>>;
 };
 
 let keyStore: KeyStore = {
@@ -183,6 +184,7 @@ export function setHeaderByKeyStore(
       );
       requestHeaders.set(`x-${POWERED_BY}-azure-api-version`, item.apiVersion);
       requestHeaders.set(`x-${POWERED_BY}-azure-model-name`, item.modelName);
+      requestHeaders.set(HEADER_KEYS.PROXY, item.proxy || '');
       requestHeaders.set('authorization', `Bearer ${item.apiKey}`);
       return true;
     }
@@ -197,6 +199,7 @@ export function setHeaderByKeyStore(
         item.accessKey
       );
       requestHeaders.set(`x-${POWERED_BY}-aws-region`, item.region);
+      requestHeaders.set(HEADER_KEYS.PROXY, item.proxy || '');
       requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
       return true;
     }
@@ -211,6 +214,7 @@ export function setHeaderByKeyStore(
         `x-${POWERED_BY}-vertex-service-account-json`,
         JSON.stringify(item.serviceAccountJson)
       );
+      requestHeaders.set(HEADER_KEYS.PROXY, item.proxy || '');
       requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
       return true;
     }
@@ -219,12 +223,13 @@ export function setHeaderByKeyStore(
       if (!item) {
         return false;
       }
-      requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
       if (!modelRequest) {
         return false;
       }
       const realModelName = item.models[modelRequest] || modelRequest;
       requestHeaders.set(`x-${POWERED_BY}-doubao-model-name`, realModelName);
+      requestHeaders.set(HEADER_KEYS.PROXY, item.proxy || '');
+      requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
       return true;
     }
     default: {
@@ -232,6 +237,7 @@ export function setHeaderByKeyStore(
       if (!item) {
         return false;
       }
+      requestHeaders.set(HEADER_KEYS.PROXY, item.proxy || '');
       requestHeaders.set('authorization', `Bearer ${item.apiKey || ''}`);
       return true;
     }

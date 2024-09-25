@@ -54,6 +54,8 @@ export interface Options {
   overrideParams?: Params;
   /** The actual url used to make llm calls */
   urlToFetch?: string;
+  /** The proxy used to send request */
+  proxy?: string;
   /** Azure specific */
   resourceName?: string;
   deploymentId?: string;

@@ -87,6 +87,11 @@ export function constructRequest(
     delete headers['content-type'];
   }
 
+  // bun supports with 'proxy' field of RequestInit
+  const proxy = requestHeaders[HEADER_KEYS.PROXY];
+  //@ts-ignore
+  if (proxy) fetchOptions.proxy = proxy;
+
   return fetchOptions;
 }
 
@@ -1114,6 +1119,7 @@ export function constructConfigFromRequestHeaders(
   return {
     provider: requestHeaders[`x-${POWERED_BY}-provider`],
     apiKey: requestHeaders['authorization']?.replace('Bearer ', ''),
+    proxy: requestHeaders[HEADER_KEYS.PROXY],
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === AZURE_OPEN_AI &&
       azureConfig),
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === BEDROCK &&
@@ -1287,9 +1293,9 @@ async function cacheHandler(
   return {
     cacheResponse: !!cacheResponse
       ? new Response(responseBody, {
-          headers: { 'content-type': 'application/json' },
-          status: responseStatus,
-        })
+        headers: { 'content-type': 'application/json' },
+        status: responseStatus,
+      })
       : undefined,
     cacheStatus,
     cacheKey,

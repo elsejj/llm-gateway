@@ -70,7 +70,8 @@ async function importPrivateKey(pem: string): Promise<CryptoKey> {
 }
 
 export const getAccessToken = async (
-  serviceAccountInfo: Record<string, any>
+  serviceAccountInfo: Record<string, any>,
+  proxy?: string
 ): Promise<string> => {
   try {
     const scope = 'https://www.googleapis.com/auth/cloud-platform';
@@ -109,6 +110,8 @@ export const getAccessToken = async (
       headers: tokenHeaders,
       body: tokenData,
       method: 'POST',
+      // @ts-ignore - bun supports this
+      proxy,
     });
 
     const tokenJson: Record<string, any> = await tokenResponse.json();
