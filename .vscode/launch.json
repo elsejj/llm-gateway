@@ -12,6 +12,19 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "bun",
+      "internalConsoleOptions": "neverOpen",
+      "request": "launch",
+      "name": "Server",
+      "program": "src/start-server.ts",
+      "args": [
+        "--port=30027"
+      ],
+      "cwd": "${workspaceFolder}",
+      "stopOnEntry": false,
+      "watchMode": false
+    },
+    {
       "name": "Wrangler debug",
       "type": "node",
       "request": "attach",
@@ -26,13 +39,19 @@
       "request": "launch",
       "name": "Node debug",
       "runtimeExecutable": "tsx",
-      "runtimeArgs": ["${workspaceFolder}/build/src/start-server.js"],
+      "runtimeArgs": [
+        "${workspaceFolder}/build/src/start-server.js"
+      ],
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/build/**/*.js"],
+      "outFiles": [
+        "${workspaceFolder}/build/**/*.js"
+      ],
       "sourceMapPathOverrides": {
         "../src/*": "${workspaceFolder}/src/*"
       },
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "preLaunchTask": "npx tsc",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
