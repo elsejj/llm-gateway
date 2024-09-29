@@ -46,7 +46,10 @@ export const GoogleApiConfig: ProviderAPIConfig = {
       if (cacheToken && cacheToken.expireAt > now) {
         authToken = cacheToken.token;
       } else {
-        authToken = await getAccessToken(vertexServiceAccountJson, providerOptions.proxy);
+        authToken = await getAccessToken(
+          vertexServiceAccountJson,
+          providerOptions.proxy
+        );
         cachedSAToken[vertexServiceAccountJson.private_key_id] = {
           token: authToken,
           expireAt: now + 3500,

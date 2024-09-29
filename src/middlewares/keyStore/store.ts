@@ -75,8 +75,8 @@ type KeyStore = {
   'vertex-ai': WithRoundRobin<VertexKeyItem>;
   doubao: WithRoundRobin<DouBaoKeyItem>;
   [key: string]:
-  | WithRoundRobin<KeyItem>
-  | Record<string, WithRoundRobin<KeyItem>>;
+    | WithRoundRobin<KeyItem>
+    | Record<string, WithRoundRobin<KeyItem>>;
 };
 
 let keyStore: KeyStore = {

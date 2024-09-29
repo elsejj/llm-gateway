@@ -1293,9 +1293,9 @@ async function cacheHandler(
   return {
     cacheResponse: !!cacheResponse
       ? new Response(responseBody, {
-        headers: { 'content-type': 'application/json' },
-        status: responseStatus,
-      })
+          headers: { 'content-type': 'application/json' },
+          status: responseStatus,
+        })
       : undefined,
     cacheStatus,
     cacheKey,
