@@ -44,6 +44,7 @@ import DouBaoConfig from './doubao';
 import { cerebrasProviderAPIConfig } from './cerebras';
 import { InferenceNetProviderConfigs } from './inference-net';
 import SambaNovaConfig from './sambanova';
+import { UpstageConfig } from './upstage';
 
 const Providers: { [key: string]: ProviderConfigs } = {
   openai: OpenAIConfig,
@@ -89,6 +90,7 @@ const Providers: { [key: string]: ProviderConfigs } = {
   cerebras: cerebrasProviderAPIConfig,
   'inference-net': InferenceNetProviderConfigs,
   sambanova: SambaNovaConfig,
+  upstage: UpstageConfig,
 };
 
 export default Providers;
