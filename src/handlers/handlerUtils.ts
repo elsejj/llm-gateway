@@ -34,6 +34,7 @@ import { afterRequestHookHandler, responseHandler } from './responseHandlers';
 import { HookSpan, HooksManager } from '../middlewares/hooks';
 import { ConditionalRouter } from '../services/conditionalRouter';
 import { RouterError } from '../errors/RouterError';
+import { GatewayError } from '../errors/GatewayError';
 
 /**
  * Constructs the request options for the API call.
@@ -473,11 +474,19 @@ export async function tryPost(
     strictOpenAiCompliance = false;
   }
 
+  let metadata: Record<string, string>;
+  try {
+    metadata = JSON.parse(requestHeaders[HEADER_KEYS.METADATA]);
+  } catch (err) {
+    metadata = {};
+  }
+
   const provider: string = providerOption.provider ?? '';
 
   const hooksManager = c.get('hooksManager');
   const hookSpan = hooksManager.createSpan(
     params,
+    metadata,
     provider,
     isStreamingMode,
     providerOption.beforeRequestHooks || [],
@@ -827,6 +836,9 @@ export async function tryTargetsRecursively(
           `${currentJsonPath}.targets[${index}]`,
           currentInheritedConfig
         );
+        if (response?.headers.get('x-portkey-gateway-exception') === 'true') {
+          break;
+        }
         if (
           response?.ok &&
           !currentTarget.strategy?.onStatusCodes?.includes(response?.status)
@@ -919,9 +931,33 @@ export async function tryTargetsRecursively(
           currentJsonPath
         );
       } catch (error: any) {
-        response = error.response;
-        if (!response) {
-          throw error;
+        // tryPost always returns a Response.
+        // TypeError will check for all unhandled exceptions.
+        // GatewayError will check for all handled exceptions which cannot allow the request to proceed.
+        if (error instanceof TypeError || error instanceof GatewayError) {
+          const errorMessage =
+            error instanceof GatewayError
+              ? error.message
+              : 'Something went wrong';
+          response = new Response(
+            JSON.stringify({
+              status: 'failure',
+              message: errorMessage,
+            }),
+            {
+              status: 500,
+              headers: {
+                'content-type': 'application/json',
+                // Add this header so that the fallback loop can be interrupted if its an exception.
+                'x-portkey-gateway-exception': 'true',
+              },
+            }
+          );
+        } else {
+          response = error.response;
+          if (!response) {
+            throw error;
+          }
         }
       }
       break;
@@ -1293,9 +1329,9 @@ async function cacheHandler(
   return {
     cacheResponse: !!cacheResponse
       ? new Response(responseBody, {
-          headers: { 'content-type': 'application/json' },
-          status: responseStatus,
-        })
+        headers: { 'content-type': 'application/json' },
+        status: responseStatus,
+      })
       : undefined,
     cacheStatus,
     cacheKey,

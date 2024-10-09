@@ -72,7 +72,9 @@ export const DOUBAO = 'doubao';
 export const CEREBRAS: string = 'cerebras';
 export const INFERENCENET: string = 'inference-net';
 export const SAMBANOVA: string = 'sambanova';
+export const LEMONFOX_AI: string = 'lemonfox-ai';
 export const UPSTAGE: string = 'upstage';
+export const LAMBDA: string = 'lambda';
 
 export const VALID_PROVIDERS = [
   ANTHROPIC,
@@ -118,7 +120,9 @@ export const VALID_PROVIDERS = [
   CEREBRAS,
   INFERENCENET,
   SAMBANOVA,
+  LEMONFOX_AI,
   UPSTAGE,
+  LAMBDA,
 ];
 
 export const CONTENT_TYPES = {
