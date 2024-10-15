@@ -40,4 +40,5 @@ if (!masterKey) {
 }
 
 const token = await generateApiKey(expiredDuration, masterKey);
+console.log(expiredDuration);
 console.log(token);
