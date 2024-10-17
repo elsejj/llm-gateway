@@ -70,6 +70,7 @@ export const retryRequest = async (
     await retry(
       async (bail: any, attempt: number) => {
         try {
+          console.log(`${new Date().toISOString()} request start ${url}`)
           const response: Response = timeout
             ? await fetchWithTimeout(url, options, timeout)
             : await fetch(url, options);
@@ -93,6 +94,7 @@ export const retryRequest = async (
             return;
           }
           lastResponse = response;
+          console.log(`${new Date().toISOString()} request done ${url}`)
         } catch (error: any) {
           lastError = error;
           if (attempt >= retryCount + 1) {
