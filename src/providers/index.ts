@@ -48,6 +48,7 @@ import LemonfoxAIConfig from './lemonfox-ai';
 import { UpstageConfig } from './upstage';
 import { LAMBDA } from '../globals';
 import { LambdaProviderConfig } from './lambda';
+import { DashScopeConfig } from './dashscope';
 
 const Providers: { [key: string]: ProviderConfigs } = {
   openai: OpenAIConfig,
@@ -96,6 +97,7 @@ const Providers: { [key: string]: ProviderConfigs } = {
   'lemonfox-ai': LemonfoxAIConfig,
   upstage: UpstageConfig,
   [LAMBDA]: LambdaProviderConfig,
+  dashscope: DashScopeConfig,
 };
 
 export default Providers;
