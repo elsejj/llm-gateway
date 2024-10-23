@@ -84,6 +84,10 @@ export const GoogleApiConfig: ProviderAPIConfig = {
         'embed',
         `${projectRoute}/publishers/${provider}/models/${model}:predict`,
       ],
+      [
+        'imageGenerate',
+        `${projectRoute}/publishers/${provider}/models/${model}:predict`,
+      ],
     ]);
 
     switch (provider) {
