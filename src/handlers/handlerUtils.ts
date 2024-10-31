@@ -275,6 +275,7 @@ export async function tryPostProxy(
     : (providerOption.urlToFetch as string);
 
   const headers = await apiConfig.headers({
+    c,
     providerOptions: providerOption,
     fn,
     transformedRequestBody: params,
@@ -526,6 +527,7 @@ export async function tryPost(
   const url = `${baseUrl}${endpoint}`;
 
   const headers = await apiConfig.headers({
+    c,
     providerOptions: providerOption,
     fn,
     transformedRequestBody,
@@ -1046,6 +1048,9 @@ export function constructConfigFromRequestHeaders(
     awsSecretAccessKey: requestHeaders[`x-${POWERED_BY}-aws-secret-access-key`],
     awsSessionToken: requestHeaders[`x-${POWERED_BY}-aws-session-token`],
     awsRegion: requestHeaders[`x-${POWERED_BY}-aws-region`],
+    awsRoleArn: requestHeaders[`x-${POWERED_BY}-aws-role-arn`],
+    awsAuthType: requestHeaders[`x-${POWERED_BY}-aws-auth-type`],
+    awsExternalId: requestHeaders[`x-${POWERED_BY}-aws-external-id`],
   };
 
   const workersAiConfig = {
