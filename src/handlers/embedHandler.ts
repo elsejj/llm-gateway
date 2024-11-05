@@ -66,6 +66,7 @@ export async function embedHandler(c: Context): Promise<Response> {
       });
     }
   } catch (err: any) {
+    console.error(`embed error: ${err.message}`);
     return new Response(
       JSON.stringify({
         status: 'failure',
