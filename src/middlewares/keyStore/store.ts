@@ -155,6 +155,7 @@ export function setHeaderByKeyStore(
 
   const store = keyStore[provider];
   if (!store) {
+    console.warn(`setHeaderByKeyStore failed: ${provider}`);
     return false;
   }
 

@@ -151,3 +151,4 @@ bunfig.toml
 
 # llm keys
 llmkeys.json
+nohup.out

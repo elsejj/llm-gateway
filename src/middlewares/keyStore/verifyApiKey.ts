@@ -160,14 +160,17 @@ export async function verifyApiKey(
       return true;
     }
     if (!apiKey) {
+      console.warn('verifyApiKey failed:', 'no api key');
       return false;
     }
     const parsedApiKey = await decryptApiKey(apiKey, masterKey);
     if (parsedApiKey.expireAt < Date.now() / 1000) {
+      console.warn('verifyApiKey failed:', 'api key expired');
       return false;
     }
     return true;
   } catch (e) {
+    console.warn('verifyApiKey failed:', e);
     return false;
   }
 }
