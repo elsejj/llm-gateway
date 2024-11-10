@@ -7,6 +7,7 @@
 import { Hono, MiddlewareHandler } from 'hono';
 import { prettyJSON } from 'hono/pretty-json';
 import { HTTPException } from 'hono/http-exception';
+import { cors } from 'hono/cors';
 // import { env } from 'hono/adapter' // Have to set this up for multi-environment deployment
 
 import { completeHandler } from './handlers/completeHandler';
@@ -28,6 +29,7 @@ import { createSpeechHandler } from './handlers/createSpeechHandler';
 import conf from '../conf.json';
 import { createTranscriptionHandler } from './handlers/createTranscriptionHandler';
 import { createTranslationHandler } from './handlers/createTranslationHandler';
+import { HEADER_KEYS } from './globals';
 
 // Create a new Hono server instance
 const app = new Hono();
@@ -45,6 +47,17 @@ function bunCompress(): MiddlewareHandler {
     ctx.res.headers.delete('Content-Encoding');
   };
 }
+
+app.use(
+  '*',
+  cors({
+    origin: '*',
+    allowMethods: ['POST', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', HEADER_KEYS.PROVIDER],
+    credentials: true,
+    maxAge: 86400,
+  })
+);
 
 app.use('*', (c, next) => {
   const runtime = getRuntimeKey();
