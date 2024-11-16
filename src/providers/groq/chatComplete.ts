@@ -149,7 +149,7 @@ export const GroqChatCompleteStreamChunkTransform: (
           index: parsedChunk.choices[0].index || 0,
           delta: {},
           logprobs: null,
-          finish_reason: parsedChunk.choices[0].index,
+          finish_reason: `${parsedChunk.choices[0].index}`,
         },
       ],
       usage: {
