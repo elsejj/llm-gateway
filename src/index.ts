@@ -30,6 +30,7 @@ import conf from '../conf.json';
 import { createTranscriptionHandler } from './handlers/createTranscriptionHandler';
 import { createTranslationHandler } from './handlers/createTranslationHandler';
 import { HEADER_KEYS } from './globals';
+import { modelsHandler, providersHandler } from './handlers/modelsHandler';
 
 // Create a new Hono server instance
 const app = new Hono();
@@ -192,6 +193,9 @@ app.post('/v1/prompts/*', requestValidator, (c) => {
     message: 'prompt completions error: Something went wrong',
   });
 });
+
+app.get('/v1/reference/models', modelsHandler);
+app.get('/v1/reference/providers', providersHandler);
 
 /**
  * @deprecated
