@@ -5,9 +5,9 @@ import {
   generateInvalidProviderResponseError,
 } from '../utils';
 
-export interface GroqChatCompleteResponse extends ChatCompletionResponse { }
+export interface GroqChatCompleteResponse extends ChatCompletionResponse {}
 
-export interface GroqErrorResponse extends ErrorResponse { }
+export interface GroqErrorResponse extends ErrorResponse {}
 
 export interface GroqStreamChunk {
   id: string;
