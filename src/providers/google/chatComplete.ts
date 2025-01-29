@@ -9,10 +9,16 @@ import {
   SYSTEM_MESSAGE_ROLES,
 } from '../../types/requestBody';
 import { buildGoogleSearchRetrievalTool } from '../google-vertex-ai/chatComplete';
-import { derefer, getMimeType } from '../google-vertex-ai/utils';
+import {
+  derefer,
+  getMimeType,
+  recursivelyDeleteUnsupportedParameters,
+  transformVertexLogprobs,
+} from '../google-vertex-ai/utils';
 import {
   ChatCompletionResponse,
   ErrorResponse,
+  Logprobs,
   ProviderConfig,
 } from '../types';
 import {
@@ -43,8 +49,17 @@ const transformGenerationConfig = (params: Params) => {
   if (params?.response_format?.type === 'json_object') {
     generationConfig['responseMimeType'] = 'application/json';
   }
+  if (params['logprobs']) {
+    generationConfig['responseLogprobs'] = params['logprobs'];
+  }
+  if (params['top_logprobs']) {
+    generationConfig['logprobs'] = params['top_logprobs']; // range 1-5, openai supports 1-20
+  }
   if (params?.response_format?.type === 'json_schema') {
     generationConfig['responseMimeType'] = 'application/json';
+    recursivelyDeleteUnsupportedParameters(
+      params?.response_format?.json_schema?.schema
+    );
     let schema =
       params?.response_format?.json_schema?.schema ??
       params?.response_format?.json_schema;
@@ -108,6 +123,8 @@ export const transformOpenAIRoleToGoogleRole = (
       return 'model';
     case 'tool':
       return 'function';
+    case 'developer':
+      return 'system';
     default:
       return role;
   }
@@ -322,6 +339,14 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
     param: 'generationConfig',
     transform: (params: Params) => transformGenerationConfig(params),
   },
+  logprobs: {
+    param: 'generationConfig',
+    transform: (params: Params) => transformGenerationConfig(params),
+  },
+  top_logprobs: {
+    param: 'generationConfig',
+    transform: (params: Params) => transformGenerationConfig(params),
+  },
   tools: {
     param: 'tools',
     default: '',
@@ -330,6 +355,10 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
       const tools: any = [];
       params.tools?.forEach((tool) => {
         if (tool.type === 'function') {
+          // these are not supported by google
+          recursivelyDeleteUnsupportedParameters(tool.function?.parameters);
+          delete tool.function?.strict;
+
           if (tool.function.name === 'googleSearchRetrieval') {
             tools.push(buildGoogleSearchRetrievalTool(tool));
           } else {
@@ -384,39 +413,60 @@ interface GoogleGenerateFunctionCall {
   args: Record<string, any>;
 }
 
-interface GoogleGenerateContentResponse {
-  candidates: {
-    content: {
-      parts: {
-        text?: string;
-        functionCall?: GoogleGenerateFunctionCall;
-      }[];
-    };
-    finishReason: string;
-    index: 0;
-    safetyRatings: {
-      category: string;
-      probability: string;
+interface GoogleResponseCandidate {
+  content: {
+    parts: {
+      text?: string;
+      thought?: string; // for models like gemini-2.0-flash-thinking-exp refer: https://ai.google.dev/gemini-api/docs/thinking-mode#streaming_model_thinking
+      functionCall?: GoogleGenerateFunctionCall;
     }[];
-    groundingMetadata?: {
-      webSearchQueries?: string[];
-      searchEntryPoint?: {
-        renderedContent: string;
-      };
-      groundingSupports?: Array<{
-        segment: {
-          startIndex: number;
-          endIndex: number;
-          text: string;
-        };
-        groundingChunkIndices: number[];
-        confidenceScores: number[];
-      }>;
-      retrievalMetadata?: {
-        webDynamicRetrievalScore: number;
-      };
-    };
+  };
+  logprobsResult?: {
+    topCandidates: [
+      {
+        candidates: [
+          {
+            token: string;
+            logProbability: number;
+          },
+        ];
+      },
+    ];
+    chosenCandidates: [
+      {
+        token: string;
+        logProbability: number;
+      },
+    ];
+  };
+  finishReason: string;
+  index: 0;
+  safetyRatings: {
+    category: string;
+    probability: string;
   }[];
+  groundingMetadata?: {
+    webSearchQueries?: string[];
+    searchEntryPoint?: {
+      renderedContent: string;
+    };
+    groundingSupports?: Array<{
+      segment: {
+        startIndex: number;
+        endIndex: number;
+        text: string;
+      };
+      groundingChunkIndices: number[];
+      confidenceScores: number[];
+    }>;
+    retrievalMetadata?: {
+      webDynamicRetrievalScore: number;
+    };
+  };
+}
+
+interface GoogleGenerateContentResponse {
+  candidates: GoogleResponseCandidate[];
   promptFeedback: {
     safetyRatings: {
       category: string;
@@ -476,11 +526,26 @@ export const GoogleChatCompleteResponseTransform: (
       provider: 'google',
       choices:
         response.candidates?.map((generation, idx) => {
+          const containsChainOfThoughtMessage =
+            generation.content?.parts.length > 1;
           let message: Message = { role: 'assistant', content: '' };
           if (generation.content?.parts[0]?.text) {
+            let content: string = generation.content.parts[0]?.text;
+            if (
+              containsChainOfThoughtMessage &&
+              generation.content.parts[1]?.text
+            ) {
+              if (strictOpenAiCompliance)
+                content = generation.content.parts[1]?.text;
+              else
+                content =
+                  generation.content.parts[0]?.text +
+                  '\r\n\r\n' +
+                  generation.content.parts[1]?.text;
+            }
             message = {
               role: 'assistant',
-              content: generation.content.parts[0]?.text,
+              content,
             };
           } else if (generation.content?.parts[0]?.functionCall) {
             message = {
@@ -499,8 +564,17 @@ export const GoogleChatCompleteResponseTransform: (
               }),
             };
           }
+          const logprobsContent: Logprobs[] | null =
+            transformVertexLogprobs(generation);
+          let logprobs;
+          if (logprobsContent) {
+            logprobs = {
+              content: logprobsContent,
+            };
+          }
           return {
             message: message,
+            logprobs,
             index: generation.index ?? idx,
             finish_reason: generation.finishReason,
             ...(!strictOpenAiCompliance && generation.groundingMetadata
@@ -527,9 +601,11 @@ export const GoogleChatCompleteStreamChunkTransform: (
 ) => string = (
   responseChunk,
   fallbackId,
-  _streamState,
+  streamState,
   strictOpenAiCompliance
 ) => {
+  streamState.containsChainOfThoughtMessage =
+    streamState?.containsChainOfThoughtMessage ?? false;
   let chunk = responseChunk.trim();
   if (chunk.startsWith('[')) {
     chunk = chunk.slice(1);
@@ -559,10 +635,32 @@ export const GoogleChatCompleteStreamChunkTransform: (
       choices:
         parsedChunk.candidates?.map((generation, index) => {
           let message: Message = { role: 'assistant', content: '' };
-          if (generation.content.parts[0]?.text) {
+          if (generation.content?.parts[0]?.text) {
+            if (generation.content.parts[0].thought)
+              streamState.containsChainOfThoughtMessage = true;
+
+            let content: string =
+              strictOpenAiCompliance &&
+              streamState.containsChainOfThoughtMessage
+                ? ''
+                : generation.content.parts[0]?.text;
+            if (generation.content.parts[1]?.text) {
+              if (strictOpenAiCompliance)
+                content = generation.content.parts[1].text;
+              else content += '\r\n\r\n' + generation.content.parts[1]?.text;
+              streamState.containsChainOfThoughtMessage = false;
+            } else if (
+              streamState.containsChainOfThoughtMessage &&
+              !generation.content.parts[0]?.thought
+            ) {
+              if (strictOpenAiCompliance)
+                content = generation.content.parts[0].text;
+              else content = '\r\n\r\n' + content;
+              streamState.containsChainOfThoughtMessage = false;
+            }
             message = {
               role: 'assistant',
-              content: generation.content.parts[0]?.text,
+              content,
             };
           } else if (generation.content.parts[0]?.functionCall) {
             message = {

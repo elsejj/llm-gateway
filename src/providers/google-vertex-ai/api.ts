@@ -1,6 +1,15 @@
 import { Options } from '../../types/requestBody';
-import { ProviderAPIConfig } from '../types';
+import { endpointStrings, ProviderAPIConfig } from '../types';
 import { getModelAndProvider, getAccessToken } from './utils';
+
+const shouldUseBeta1Version = (provider: string, inputModel: string) => {
+  if (
+    provider === 'meta' ||
+    inputModel.includes('gemini-2.0-flash-thinking-exp')
+  )
+    return true;
+  return false;
+};
 
 const getProjectRoute = (
   providerOptions: Options,
@@ -17,7 +26,10 @@ const getProjectRoute = (
   }
 
   const { provider } = getModelAndProvider(inputModel as string);
-  const routeVersion = provider === 'meta' ? 'v1beta1' : 'v1';
+  let routeVersion = provider === 'meta' ? 'v1beta1' : 'v1';
+  if (shouldUseBeta1Version(provider, inputModel)) {
+    routeVersion = 'v1beta1';
+  }
   return `/${routeVersion}/projects/${projectId}/locations/${vertexRegion}`;
 };
 
@@ -62,11 +74,11 @@ export const GoogleApiConfig: ProviderAPIConfig = {
       Authorization: `Bearer ${authToken}`,
     };
   },
-  getEndpoint: ({ fn, gatewayRequestBody, providerOptions }) => {
+  getEndpoint: ({ fn, gatewayRequestBodyJSON, providerOptions }) => {
     let mappedFn = fn;
-    const { model: inputModel, stream } = gatewayRequestBody;
+    const { model: inputModel, stream } = gatewayRequestBodyJSON;
     if (stream) {
-      mappedFn = `stream-${fn}`;
+      mappedFn = `stream-${fn}` as endpointStrings;
     }
 
     const { provider, model } = getModelAndProvider(inputModel as string);
