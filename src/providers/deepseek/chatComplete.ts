@@ -176,22 +176,27 @@ export const DeepSeekChatCompleteStreamChunkTransform: (
   if (chunk === '[DONE]') {
     return `data: ${chunk}\n\n`;
   }
-  const parsedChunk: DeepSeekStreamChunk = JSON.parse(chunk);
-  return (
-    `data: ${JSON.stringify({
-      id: parsedChunk.id,
-      object: parsedChunk.object,
-      created: parsedChunk.created,
-      model: parsedChunk.model,
-      provider: DEEPSEEK,
-      choices: parsedChunk.choices?.map((c) => {
-        return {
-          index: c.index,
-          delta: c.delta,
-          finish_reason: c.finish_reason,
-        };
-      }),
-      usage: parsedChunk.usage,
-    })}` + '\n\n'
-  );
+  try {
+    const parsedChunk: DeepSeekStreamChunk = JSON.parse(chunk);
+    return (
+      `data: ${JSON.stringify({
+        id: parsedChunk.id,
+        object: parsedChunk.object,
+        created: parsedChunk.created,
+        model: parsedChunk.model,
+        provider: DEEPSEEK,
+        choices: parsedChunk.choices?.map((c) => {
+          return {
+            index: c.index,
+            delta: c.delta,
+            finish_reason: c.finish_reason,
+          };
+        }),
+        usage: parsedChunk.usage,
+      })}` + '\n\n'
+    );
+  } catch (e) {
+    console.warn('Failed to parse chunk ', chunk);
+    return `data: ${chunk}\n\n`;
+  }
 };
