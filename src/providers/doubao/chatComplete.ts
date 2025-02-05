@@ -188,13 +188,13 @@ export const DouBaoChatCompleteStreamChunkTransform: (
       created: parsedChunk.created,
       model: parsedChunk.model,
       provider: DOUBAO,
-      choices: [
-        {
-          index: parsedChunk.choices[0].index,
-          delta: parsedChunk.choices[0].delta,
-          finish_reason: parsedChunk.choices[0].finish_reason,
-        },
-      ],
+      choices: parsedChunk.choices?.map((c) => {
+        return {
+          index: c.index,
+          delta: c.delta,
+          finish_reason: c.finish_reason,
+        };
+      }),
       usage: parsedChunk.usage,
     })}` + '\n\n'
   );
