@@ -152,3 +152,5 @@ bunfig.toml
 # llm keys
 llmkeys.json
 nohup.out
+
+plugins/**/.parameters.json
