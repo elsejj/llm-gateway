@@ -1,4 +1,5 @@
 import { DOUBAO } from '../../globals';
+import { Params } from '../../types/requestBody';
 
 import {
   ChatCompletionResponse,
@@ -19,6 +20,21 @@ export const DouBaoChatCompleteConfig: ProviderConfig = {
   messages: {
     param: 'messages',
     default: '',
+    transform: (params: Params) => {
+      const mapped = params.messages?.map((message) => {
+        if (Array.isArray(message.content)) {
+          if (message.content.findIndex((c) => c.type === 'image_url') < 0) {
+            // pure text message
+            return {
+              role: message.role,
+              content: message.content.map((c) => c.text || '').join(''),
+            };
+          }
+        }
+        return message;
+      });
+      return mapped;
+    },
   },
   max_tokens: {
     param: 'max_tokens',
