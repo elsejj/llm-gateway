@@ -57,6 +57,10 @@ export const DouBaoChatCompleteConfig: ProviderConfig = {
     param: 'stream',
     default: false,
   },
+  stream_options: {
+    param: 'stream_options',
+    default: null,
+  },
   frequency_penalty: {
     param: 'frequency_penalty',
     default: 0,
@@ -118,6 +122,11 @@ interface DouBaoStreamChunk {
     index: number;
     finish_reason: string | null;
   }[];
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
 }
 
 export const DouBaoChatCompleteResponseTransform: (
@@ -186,6 +195,7 @@ export const DouBaoChatCompleteStreamChunkTransform: (
           finish_reason: parsedChunk.choices[0].finish_reason,
         },
       ],
+      usage: parsedChunk.usage,
     })}` + '\n\n'
   );
 };
