@@ -1,5 +1,5 @@
 import { Context } from 'hono';
-import { HEADER_KEYS, POWERED_BY } from '../../globals';
+import { POWERED_BY } from '../../globals';
 import { verifyApiKey } from './verifyApiKey';
 import { setHeaderByKeyStore } from './store';
 
@@ -21,17 +21,16 @@ export const keyStore = () => {
         ok = setHeaderByKeyStore(reqHeaders, model);
       } catch (e) {
         console.error('setHeaderByKeyStore error', e);
-      } finally {
-        if (!ok) {
-          const msg = JSON.stringify({
-            status: 'failure',
-            message: `cannot set header from keystore`,
-          });
-          return new Response(msg, {
-            status: 400,
-            headers: { 'content-type': 'application/json' },
-          });
-        }
+      }
+      if (!ok) {
+        const msg = JSON.stringify({
+          status: 'failure',
+          message: `cannot set header from keystore`,
+        });
+        return new Response(msg, {
+          status: 400,
+          headers: { 'content-type': 'application/json' },
+        });
       }
     }
     return next();

@@ -14,6 +14,7 @@ const KEY_STORE_FILE = process.env.LLM_GATEWAY_KEY_STORE_FILE || 'llmkeys.json';
 type KeyItem = {
   apiKey: string;
   proxy?: string;
+  modelKeyword?: string[];
 };
 
 type AzureOpenAIKeyItem = {
@@ -49,7 +50,7 @@ type AllKeyItem = {
 };
 
 class WithRoundRobin<T> {
-  private items: T[];
+  public items: T[];
   private index: number;
 
   constructor(items: T[]) {
@@ -85,6 +86,8 @@ let keyStore: KeyStore = {
   'vertex-ai': new WithRoundRobin([]),
   doubao: new WithRoundRobin([]),
 };
+
+let providerModelPattern: Record<string, string[]> = {};
 
 function buildStore(key: string, data: any[]): any {
   switch (key) {
@@ -123,8 +126,19 @@ function loadKeyStore(filename: string) {
   try {
     const body = fs.readFileSync(filename, 'utf8');
     const data = JSON.parse(body) as AllKeyItem;
-    for (const key in data) {
-      keyStore[key] = buildStore(key, data[key]);
+    for (const provider in data) {
+      const keyItems = data[provider];
+      keyStore[provider] = buildStore(provider, keyItems);
+      for (const keyItem of keyItems) {
+        if (keyItem.modelKeyword) {
+          for (const keyword of keyItem.modelKeyword) {
+            if (!providerModelPattern[provider]) {
+              providerModelPattern[provider] = [];
+            }
+            providerModelPattern[provider].push(keyword);
+          }
+        }
+      }
     }
     console.log(`key store file ${filename} loaded`);
   } catch (e) {
@@ -144,13 +158,34 @@ fs.watch(storeFileDir, null, (event, filename) => {
 
 loadKeyStore(absKeyStoreFile);
 
+function providerFromModel(modelRequest: string): string {
+  if (!modelRequest) {
+    return '';
+  }
+  for (const entry of Object.entries(providerModelPattern)) {
+    const [provider, modelPatterns] = entry;
+    for (const pattern of modelPatterns) {
+      const r = new RegExp(pattern);
+      if (r.test(modelRequest)) {
+        return provider;
+      }
+    }
+  }
+  return '';
+}
+
 export function setHeaderByKeyStore(
   requestHeaders: Record<string, any>,
   modelRequest: string | undefined
 ): boolean {
-  const provider = requestHeaders.get(HEADER_KEYS.PROVIDER);
+  let provider = requestHeaders.get(HEADER_KEYS.PROVIDER);
   if (!provider) {
-    return false;
+    provider = providerFromModel(modelRequest || '');
+    if (!provider) {
+      console.warn(`setHeaderByKeyStore failed: no provider ${modelRequest}`);
+      return false;
+    }
+    requestHeaders.set(HEADER_KEYS.PROVIDER, provider);
   }
 
   const store = keyStore[provider];
@@ -158,6 +193,8 @@ export function setHeaderByKeyStore(
     console.warn(`setHeaderByKeyStore failed: ${provider}`);
     return false;
   }
+
+  console.log(`request provider: ${provider} model: ${modelRequest}`);
 
   switch (provider) {
     case AZURE_OPEN_AI: {
