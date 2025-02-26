@@ -74,7 +74,7 @@ export const GoogleApiConfig: ProviderAPIConfig = {
         authToken = await getAccessToken(
           c,
           vertexServiceAccountJson,
-          providerOptions.proxy,
+          providerOptions.proxy
         );
         cachedSAToken[vertexServiceAccountJson.private_key_id] = {
           token: authToken,

@@ -96,7 +96,7 @@ export const getAccessToken = async (
       if (resp) {
         return resp;
       }
-    } catch (err) { }
+    } catch (err) {}
 
     const scope = 'https://www.googleapis.com/auth/cloud-platform';
     const iat = Math.floor(Date.now() / 1000);
@@ -378,8 +378,8 @@ export const fetchGoogleCustomEndpoint = async ({
     const options = {
       ...(method !== 'GET' &&
         body && {
-        body: typeof body === 'object' ? JSON.stringify(body) : body,
-      }),
+          body: typeof body === 'object' ? JSON.stringify(body) : body,
+        }),
       method: method,
       headers: {
         Authorization: authorization,
