@@ -123,7 +123,7 @@ export const transformOpenAIRoleToGoogleRole = (
     case 'assistant':
       return 'model';
     case 'tool':
-      return 'function';
+      return 'user';
     case 'developer':
       return 'system';
     default:
