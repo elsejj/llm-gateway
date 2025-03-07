@@ -83,6 +83,10 @@ export const DeepSeekChatCompleteConfig: ProviderConfig = {
     min: 0,
     max: 20,
   },
+  tools: {
+    param: 'tools',
+    default: null,
+  },
 };
 
 interface DeepSeekChatCompleteResponse extends ChatCompletionResponse {

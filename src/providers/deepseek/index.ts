@@ -1,18 +1,39 @@
 import { ProviderConfigs } from '../types';
+import { DEEPSEEK } from '../../globals';
+import { chatCompleteParams, responseTransformers } from '../open-ai-base';
 import DeepSeekAPIConfig from './api';
-import {
-  DeepSeekChatCompleteConfig,
-  DeepSeekChatCompleteResponseTransform,
-  DeepSeekChatCompleteStreamChunkTransform,
-} from './chatComplete';
+import { Params, Message } from '../../types/requestBody';
 
 const DeepSeekConfig: ProviderConfigs = {
-  chatComplete: DeepSeekChatCompleteConfig,
+  chatComplete: chatCompleteParams(
+    [],
+    {
+      model: 'deepseek-chat',
+    },
+    {
+      messages: {
+        param: 'messages',
+        default: '',
+        transform: (params: Params) => {
+          return params.messages?.map((message: Message) => {
+            if (
+              message.role === 'tool' &&
+              Array.isArray(message.content) &&
+              message.content.length > 0
+            ) {
+              // deepseek only supports string content
+              message.content = message.content[0].text || '';
+            }
+            return message;
+          });
+        },
+      },
+    }
+  ),
   api: DeepSeekAPIConfig,
-  responseTransforms: {
-    chatComplete: DeepSeekChatCompleteResponseTransform,
-    'stream-chatComplete': DeepSeekChatCompleteStreamChunkTransform,
-  },
+  responseTransforms: responseTransformers(DEEPSEEK, {
+    chatComplete: true,
+  }),
 };
 
 export default DeepSeekConfig;

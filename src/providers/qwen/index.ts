@@ -1,18 +1,14 @@
 import { ProviderConfigs } from '../types';
+import { QWEN } from '../../globals';
 import QWenAPIConfig from './api';
-import {
-  QWenChatCompleteConfig,
-  QWenChatCompleteResponseTransform,
-  QWenChatCompleteStreamChunkTransform,
-} from './chatComplete';
+import { chatCompleteParams, responseTransformers } from '../open-ai-base';
 
 const QWenConfig: ProviderConfigs = {
-  chatComplete: QWenChatCompleteConfig,
+  chatComplete: chatCompleteParams([], { model: 'qwen-plus' }),
   api: QWenAPIConfig,
-  responseTransforms: {
-    chatComplete: QWenChatCompleteResponseTransform,
-    'stream-chatComplete': QWenChatCompleteStreamChunkTransform,
-  },
+  responseTransforms: responseTransformers(QWEN, {
+    chatComplete: true,
+  }),
 };
 
 export default QWenConfig;
