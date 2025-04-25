@@ -2,6 +2,14 @@ import { endpointStrings } from './providers/types';
 
 export const POWERED_BY: string = 'portkey';
 
+export const MAX_RETRY_LIMIT_MS = 60 * 1000; // 60 seconds
+
+export const POSSIBLE_RETRY_STATUS_HEADERS = [
+  'retry-after-ms',
+  'x-ms-retry-after-ms',
+  'retry-after',
+];
+
 export const HEADER_KEYS: Record<string, string> = {
   MODE: `x-${POWERED_BY}-mode`,
   RETRIES: `x-${POWERED_BY}-retry-count`,
@@ -86,6 +94,7 @@ export const NEBIUS: string = 'nebius';
 export const RECRAFTAI: string = 'recraft-ai';
 export const MILVUS: string = 'milvus';
 export const REPLICATE: string = 'replicate';
+export const LEPTON: string = 'lepton';
 export const HUNYUAN: string = 'hunyuan';
 
 export const VALID_PROVIDERS = [
@@ -146,6 +155,7 @@ export const VALID_PROVIDERS = [
   REPLICATE,
   HUNYUAN,
   POWERED_BY,
+  LEPTON,
 ];
 
 export const CONTENT_TYPES = {

@@ -42,15 +42,39 @@ export const OpenrouterChatCompleteConfig: ProviderConfig = {
     min: 0,
     max: 2,
   },
+  modalities: {
+    param: 'modalities',
+  },
+  reasoning: {
+    param: 'reasoning',
+  },
   top_p: {
     param: 'top_p',
     default: 1,
     min: 0,
     max: 1,
   },
+  tools: {
+    param: 'tools',
+  },
+  tool_choice: {
+    param: 'tool_choice',
+  },
+  transforms: {
+    param: 'transforms',
+  },
+  provider: {
+    param: 'provider',
+  },
+  models: {
+    param: 'models',
+  },
   stream: {
     param: 'stream',
     default: false,
+  },
+  response_format: {
+    param: 'response_format',
   },
 };
 
@@ -137,8 +161,18 @@ export const OpenrouterChatCompleteResponseTransform: (
 };
 
 export const OpenrouterChatCompleteStreamChunkTransform: (
-  response: string
-) => string = (responseChunk) => {
+  response: string,
+  fallbackId: string,
+  _streamState: Record<string, boolean>,
+  _strictOpenAiCompliance: boolean,
+  gatewayRequest: Params
+) => string = (
+  responseChunk,
+  fallbackId,
+  _streamState,
+  _strictOpenAiCompliance,
+  gatewayRequest
+) => {
   let chunk = responseChunk.trim();
   chunk = chunk.replace(/^data: /, '');
   chunk = chunk.trim();
@@ -148,7 +182,7 @@ export const OpenrouterChatCompleteStreamChunkTransform: (
   if (chunk.includes('OPENROUTER PROCESSING')) {
     chunk = JSON.stringify({
       id: `${Date.now()}`,
-      model: '',
+      model: gatewayRequest.model || '',
       object: 'chat.completion.chunk',
       created: Date.now(),
       choices: [
@@ -170,9 +204,9 @@ export const OpenrouterChatCompleteStreamChunkTransform: (
       provider: OPENROUTER,
       choices: [
         {
-          index: parsedChunk.choices[0].index,
-          delta: parsedChunk.choices[0].delta,
-          finish_reason: parsedChunk.choices[0].finish_reason,
+          index: parsedChunk.choices?.[0]?.index,
+          delta: parsedChunk.choices?.[0]?.delta,
+          finish_reason: parsedChunk.choices?.[0]?.finish_reason,
         },
       ],
       ...(parsedChunk.usage && { usage: parsedChunk.usage }),
