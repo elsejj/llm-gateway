@@ -59,6 +59,7 @@ import MilvusConfig from './milvus';
 import ReplicateConfig from './replicate';
 import LeptonConfig from './lepton';
 import HunYuanConfig from './hunyuan';
+import BaiduBceAPIConfig from './baidu-bce';
 
 const Providers: { [key: string]: ProviderConfigs } = {
   openai: OpenAIConfig,
@@ -118,6 +119,7 @@ const Providers: { [key: string]: ProviderConfigs } = {
   replicate: ReplicateConfig,
   lepton: LeptonConfig,
   hunyuan: HunYuanConfig,
+  'baidu-bce': BaiduBceAPIConfig,
 };
 
 export default Providers;

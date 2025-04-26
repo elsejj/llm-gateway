@@ -96,6 +96,7 @@ export const MILVUS: string = 'milvus';
 export const REPLICATE: string = 'replicate';
 export const LEPTON: string = 'lepton';
 export const HUNYUAN: string = 'hunyuan';
+export const BAIDU_BCE: string = 'baidu-bce';
 
 export const VALID_PROVIDERS = [
   ANTHROPIC,
@@ -156,6 +157,7 @@ export const VALID_PROVIDERS = [
   HUNYUAN,
   POWERED_BY,
   LEPTON,
+  BAIDU_BCE,
 ];
 
 export const CONTENT_TYPES = {
