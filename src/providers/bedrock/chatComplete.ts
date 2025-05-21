@@ -1,4 +1,9 @@
-import { BEDROCK, documentMimeTypes, imagesMimeTypes } from '../../globals';
+import {
+  BEDROCK,
+  documentMimeTypes,
+  fileExtensionMimeTypeMap,
+  imagesMimeTypes,
+} from '../../globals';
 import {
   Message,
   Params,
@@ -49,13 +54,14 @@ export interface BedrockChatCompletionsParams extends Params {
 }
 
 export interface BedrockConverseAnthropicChatCompletionsParams
-  extends BedrockChatCompletionsParams {
+  extends Omit<BedrockChatCompletionsParams, 'anthropic_beta'> {
   anthropic_version?: string;
   user?: string;
   thinking?: {
     type: string;
     budget_tokens: number;
   };
+  anthropic_beta?: string | string[];
 }
 
 export interface BedrockConverseCohereChatCompletionsParams
@@ -130,12 +136,17 @@ const transformAndAppendThinkingMessageItem = (
 };
 
 const getMessageContent = (message: Message) => {
-  if (!message.content && !message.tool_calls) return [];
+  if (!message.content && !message.tool_calls && !message.tool_call_id)
+    return [];
   if (message.role === 'tool') {
+    const toolResultContent = getMessageTextContentArray(message);
     return [
       {
         toolResult: {
-          content: getMessageTextContentArray(message),
+          ...(toolResultContent.length &&
+          (toolResultContent[0] as { text: string })?.text
+            ? { content: toolResultContent }
+            : { content: [] }), // Bedrock allows empty array but does not allow empty string in content.
           toolUseId: message.tool_call_id,
         },
       },
@@ -145,11 +156,11 @@ const getMessageContent = (message: Message) => {
   const inputContent: ContentType[] | string | undefined =
     message.content_blocks ?? message.content;
   // if message is a string, return a single element array with the text
-  if (typeof inputContent === 'string') {
+  if (typeof inputContent === 'string' && inputContent.trim()) {
     out.push({
       text: inputContent,
     });
-  } else if (inputContent) {
+  } else if (inputContent && Array.isArray(inputContent)) {
     inputContent.forEach((item) => {
       if (item.type === 'text') {
         out.push({
@@ -178,6 +189,32 @@ const getMessageContent = (message: Message) => {
               name: crypto.randomUUID(),
               source: {
                 bytes,
+              },
+            },
+          });
+        }
+      } else if (item.type === 'file') {
+        const mimeType = item.file?.mime_type || fileExtensionMimeTypeMap.pdf;
+        const fileFormat = mimeType.split('/')[1];
+        if (item.file?.file_url) {
+          out.push({
+            document: {
+              format: fileFormat,
+              name: item.file.file_name || crypto.randomUUID(),
+              source: {
+                s3Location: {
+                  uri: item.file.file_url,
+                },
+              },
+            },
+          });
+        } else if (item.file?.file_data) {
+          out.push({
+            document: {
+              format: fileFormat,
+              name: item.file.file_name || crypto.randomUUID(),
+              source: {
+                bytes: item.file.file_data,
               },
             },
           });
@@ -248,7 +285,9 @@ export const BedrockConverseChatCompleteConfig: ProviderConfig = {
       required: false,
       transform: (params: BedrockChatCompletionsParams) => {
         if (!params.messages) return;
-        const systemMessages = params.messages.reduce(
+        const systemMessages: Array<
+          { text: string } | { cachePoint: { type: string } }
+        > = params.messages.reduce(
           (
             acc: Array<{ text: string } | { cachePoint: { type: string } }>,
             msg
@@ -289,7 +328,7 @@ export const BedrockConverseChatCompleteConfig: ProviderConfig = {
         }
       });
       const toolConfig = {
-        tools: tools,
+        tools,
       };
       let toolChoice = undefined;
       if (params.tool_choice) {
@@ -365,16 +404,6 @@ export const BedrockConverseChatCompleteConfig: ProviderConfig = {
     transform: (params: BedrockChatCompletionsParams) =>
       transformAdditionalModelRequestFields(params),
   },
-  top_k: {
-    param: 'additionalModelRequestFields',
-    transform: (params: BedrockChatCompletionsParams) =>
-      transformAdditionalModelRequestFields(params),
-  },
-  response_format: {
-    param: 'additionalModelRequestFields',
-    transform: (params: BedrockChatCompletionsParams) =>
-      transformAdditionalModelRequestFields(params),
-  },
 };
 
 type BedrockContentItem = {
@@ -401,7 +430,10 @@ type BedrockContentItem = {
     format: string;
     name: string;
     source: {
-      bytes: string;
+      bytes?: string;
+      s3Location?: {
+        uri: string;
+      };
     };
   };
   cachePoint?: {
@@ -526,7 +558,7 @@ export const BedrockChatCompleteResponseTransform: (
       usage: {
         prompt_tokens: response.usage.inputTokens,
         completion_tokens: response.usage.outputTokens,
-        total_tokens: response.usage.totalTokens,
+        total_tokens: response.usage.totalTokens, // contains the cache usage as well
         ...(shouldSendCacheUsage && {
           cache_read_input_tokens: response.usage.cacheReadInputTokens,
           cache_creation_input_tokens: response.usage.cacheWriteInputTokens,
@@ -841,7 +873,7 @@ export const BedrockCohereChatCompleteConfig: ProviderConfig = {
     required: true,
     transform: (params: Params) => {
       let prompt: string = '';
-      if (!!params.messages) {
+      if (params.messages) {
         let messages: Message[] = params.messages;
         messages.forEach((msg, index) => {
           if (index === 0 && SYSTEM_MESSAGE_ROLES.includes(msg.role)) {
@@ -1043,7 +1075,7 @@ export const BedrockAI21ChatCompleteConfig: ProviderConfig = {
     required: true,
     transform: (params: Params) => {
       let prompt: string = '';
-      if (!!params.messages) {
+      if (params.messages) {
         let messages: Message[] = params.messages;
         messages.forEach((msg, index) => {
           if (index === 0 && SYSTEM_MESSAGE_ROLES.includes(msg.role)) {

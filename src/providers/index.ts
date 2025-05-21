@@ -60,6 +60,7 @@ import ReplicateConfig from './replicate';
 import LeptonConfig from './lepton';
 import HunYuanConfig from './hunyuan';
 import BaiduBceAPIConfig from './baidu-bce';
+import NscaleConfig from './nscale';
 
 const Providers: { [key: string]: ProviderConfigs } = {
   openai: OpenAIConfig,
@@ -120,6 +121,7 @@ const Providers: { [key: string]: ProviderConfigs } = {
   lepton: LeptonConfig,
   hunyuan: HunYuanConfig,
   'baidu-bce': BaiduBceAPIConfig,
+  nscale: NscaleConfig,
 };
 
 export default Providers;

@@ -95,6 +95,7 @@ export const RECRAFTAI: string = 'recraft-ai';
 export const MILVUS: string = 'milvus';
 export const REPLICATE: string = 'replicate';
 export const LEPTON: string = 'lepton';
+export const NSCALE: string = 'nscale';
 export const HUNYUAN: string = 'hunyuan';
 export const BAIDU_BCE: string = 'baidu-bce';
 
@@ -157,6 +158,7 @@ export const VALID_PROVIDERS = [
   HUNYUAN,
   POWERED_BY,
   LEPTON,
+  NSCALE,
   BAIDU_BCE,
 ];
 
