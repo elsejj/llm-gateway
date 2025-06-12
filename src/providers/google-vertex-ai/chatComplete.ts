@@ -341,6 +341,10 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
     param: 'generationConfig',
     transform: (params: Params) => transformGenerationConfig(params),
   },
+  reasoning_effort: {
+    param: 'generationConfig',
+    transform: (params: Params) => transformGenerationConfig(params),
+  },
   seed: {
     param: 'generationConfig',
     transform: (params: Params) => transformGenerationConfig(params),
@@ -621,7 +625,7 @@ export const GoogleChatCompleteStreamChunkTransform: (
             if (part.thought) {
               contentBlocks.push({
                 index: 0,
-                delta: { thinking: part.text },
+                delta: { reasoning_content: part.text },
               });
               streamState.containsChainOfThoughtMessage = true;
             } else {
