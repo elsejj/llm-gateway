@@ -95,9 +95,11 @@ export const RECRAFTAI: string = 'recraft-ai';
 export const MILVUS: string = 'milvus';
 export const REPLICATE: string = 'replicate';
 export const LEPTON: string = 'lepton';
+export const KLUSTER_AI: string = 'kluster-ai';
 export const NSCALE: string = 'nscale';
 export const HUNYUAN: string = 'hunyuan';
 export const BAIDU_BCE: string = 'baidu-bce';
+export const HYPERBOLIC: string = 'hyperbolic';
 
 export const VALID_PROVIDERS = [
   ANTHROPIC,
@@ -158,8 +160,10 @@ export const VALID_PROVIDERS = [
   HUNYUAN,
   POWERED_BY,
   LEPTON,
+  KLUSTER_AI,
   NSCALE,
   BAIDU_BCE,
+  HYPERBOLIC,
 ];
 
 export const CONTENT_TYPES = {

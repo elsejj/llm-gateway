@@ -60,7 +60,9 @@ import ReplicateConfig from './replicate';
 import LeptonConfig from './lepton';
 import HunYuanConfig from './hunyuan';
 import BaiduBceAPIConfig from './baidu-bce';
+import KlusterAIConfig from './kluster-ai';
 import NscaleConfig from './nscale';
+import HyperbolicConfig from './hyperbolic';
 
 const Providers: { [key: string]: ProviderConfigs } = {
   openai: OpenAIConfig,
@@ -121,7 +123,9 @@ const Providers: { [key: string]: ProviderConfigs } = {
   lepton: LeptonConfig,
   hunyuan: HunYuanConfig,
   'baidu-bce': BaiduBceAPIConfig,
+  'kluster-ai': KlusterAIConfig,
   nscale: NscaleConfig,
+  hyperbolic: HyperbolicConfig,
 };
 
 export default Providers;
