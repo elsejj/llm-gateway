@@ -19,7 +19,8 @@
       "program": "src/start-server.ts",
       "args": [
         "--port=30027",
-        "--host=0.0.0.0"
+        "--host=0.0.0.0",
+        "--headless"
       ],
       "cwd": "${workspaceFolder}",
       "stopOnEntry": false,

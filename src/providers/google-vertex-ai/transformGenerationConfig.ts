@@ -64,6 +64,31 @@ export function transformGenerationConfig(params: Params) {
     generationConfig['thinking_config'] = thinkingConfig;
   }
 
+  if (params?.reasoning_effort) {
+    const thinkingConfig: Record<string, any> = {};
+    switch (params.reasoning_effort) {
+      case 'none':
+      case 'auto':
+        break;
+      // https://ai.google.dev/gemini-api/docs/openai#thinking
+      case 'low':
+        thinkingConfig['include_thoughts'] = true;
+        thinkingConfig['thinking_budget'] = 1000;
+        break;
+      case 'medium':
+        thinkingConfig['include_thoughts'] = true;
+        thinkingConfig['thinking_budget'] = 8000;
+        break;
+      case 'high':
+        thinkingConfig['include_thoughts'] = true;
+        thinkingConfig['thinking_budget'] = 24000;
+        break;
+    }
+    if (Object.keys(thinkingConfig).length > 0) {
+      generationConfig['thinking_config'] = thinkingConfig;
+    }
+  }
+
   return generationConfig;
 }
 

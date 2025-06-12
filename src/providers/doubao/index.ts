@@ -45,6 +45,23 @@ const DouBaoConfig: ProviderConfigs = {
           });
         },
       },
+      reasoning_effort: {
+        param: 'thinking',
+        default: null,
+        transform: (params: Params) => {
+          if (params?.reasoning_effort) {
+            switch (params.reasoning_effort) {
+              case 'none':
+                return { type: 'disabled' };
+              case 'auto':
+                return { type: 'auto' };
+              default:
+                return { type: 'enabled' };
+            }
+          }
+          return null;
+        },
+      },
     }
   ),
   api: DouBaoAPIConfig,
