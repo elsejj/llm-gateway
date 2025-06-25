@@ -63,6 +63,7 @@ import BaiduBceAPIConfig from './baidu-bce';
 import KlusterAIConfig from './kluster-ai';
 import NscaleConfig from './nscale';
 import HyperbolicConfig from './hyperbolic';
+import { FeatherlessAIConfig } from './featherless-ai';
 
 const Providers: { [key: string]: ProviderConfigs } = {
   openai: OpenAIConfig,
@@ -126,6 +127,7 @@ const Providers: { [key: string]: ProviderConfigs } = {
   'kluster-ai': KlusterAIConfig,
   nscale: NscaleConfig,
   hyperbolic: HyperbolicConfig,
+  'featherless-ai': FeatherlessAIConfig,
 };
 
 export default Providers;

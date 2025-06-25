@@ -100,6 +100,7 @@ export const NSCALE: string = 'nscale';
 export const HUNYUAN: string = 'hunyuan';
 export const BAIDU_BCE: string = 'baidu-bce';
 export const HYPERBOLIC: string = 'hyperbolic';
+export const FEATHERLESS_AI: string = 'featherless-ai';
 
 export const VALID_PROVIDERS = [
   ANTHROPIC,
@@ -164,6 +165,7 @@ export const VALID_PROVIDERS = [
   NSCALE,
   BAIDU_BCE,
   HYPERBOLIC,
+  FEATHERLESS_AI,
 ];
 
 export const CONTENT_TYPES = {
