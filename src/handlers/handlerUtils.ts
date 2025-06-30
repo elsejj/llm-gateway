@@ -335,23 +335,23 @@ export async function tryPost(
     fn === 'proxy'
       ? ''
       : apiConfig.getEndpoint({
-        c,
-        providerOptions: providerOption,
-        fn,
-        gatewayRequestBodyJSON: params,
-        gatewayRequestBody: {}, // not using anywhere.
-        gatewayRequestURL: c.req.url,
-      });
+          c,
+          providerOptions: providerOption,
+          fn,
+          gatewayRequestBodyJSON: params,
+          gatewayRequestBody: {}, // not using anywhere.
+          gatewayRequestURL: c.req.url,
+        });
 
   url =
     fn === 'proxy'
       ? getProxyPath(
-        c.req.url,
-        provider,
-        c.req.url.indexOf('/v1/proxy') > -1 ? '/v1/proxy' : '/v1',
-        baseUrl,
-        providerOption
-      )
+          c.req.url,
+          provider,
+          c.req.url.indexOf('/v1/proxy') > -1 ? '/v1/proxy' : '/v1',
+          baseUrl,
+          providerOption
+        )
       : `${baseUrl}${endpoint}`;
 
   let mappedResponse: Response;
@@ -389,13 +389,13 @@ export async function tryPost(
       transformedRequestBody =
         method === 'POST'
           ? transformToProviderRequest(
-            provider,
-            params,
-            requestBody,
-            fn,
-            requestHeaders,
-            providerOption
-          )
+              provider,
+              params,
+              requestBody,
+              fn,
+              requestHeaders,
+              providerOption
+            )
           : requestBody;
     }
     return createResponse(brhResponse, undefined, false, false);
@@ -410,13 +410,13 @@ export async function tryPost(
     transformedRequestBody =
       method === 'POST'
         ? transformToProviderRequest(
-          provider,
-          params,
-          requestBody,
-          fn,
-          requestHeaders,
-          providerOption
-        )
+            provider,
+            params,
+            requestBody,
+            fn,
+            requestHeaders,
+            providerOption
+          )
         : requestBody;
   }
 
@@ -842,8 +842,8 @@ export async function tryTargetsRecursively(
 
       let params =
         request instanceof FormData ||
-          request instanceof ReadableStream ||
-          request instanceof ArrayBuffer
+        request instanceof ReadableStream ||
+        request instanceof ArrayBuffer
           ? {} // Send empty object if not JSON
           : request;
 
@@ -1058,7 +1058,7 @@ export function constructConfigFromRequestHeaders(
       requestHeaders[`x-${POWERED_BY}-amz-server-side-encryption`],
     awsServerSideEncryptionKMSKeyId:
       requestHeaders[
-      `x-${POWERED_BY}-amz-server-side-encryption-aws-kms-key-id`
+        `x-${POWERED_BY}-amz-server-side-encryption-aws-kms-key-id`
       ],
   };
 
@@ -1071,7 +1071,7 @@ export function constructConfigFromRequestHeaders(
       requestHeaders[`x-${POWERED_BY}-amzn-sagemaker-target-variant`],
     amznSagemakerTargetContainerHostname:
       requestHeaders[
-      `x-${POWERED_BY}-amzn-sagemaker-target-container-hostname`
+        `x-${POWERED_BY}-amzn-sagemaker-target-container-hostname`
       ],
     amznSagemakerInferenceId:
       requestHeaders[`x-${POWERED_BY}-amzn-sagemaker-inference-id`],
@@ -1534,9 +1534,9 @@ async function cacheHandler(
   return {
     cacheResponse: !!cacheResponse
       ? new Response(responseBody, {
-        headers: { 'content-type': 'application/json' },
-        status: responseStatus,
-      })
+          headers: { 'content-type': 'application/json' },
+          status: responseStatus,
+        })
       : undefined,
     cacheStatus,
     cacheKey,
