@@ -17,7 +17,7 @@ const getProjectRoute = (
     vertexServiceAccountJson,
   } = providerOptions;
   let projectId = inputProjectId;
-  if (vertexServiceAccountJson) {
+  if (vertexServiceAccountJson && vertexServiceAccountJson.project_id) {
     projectId = vertexServiceAccountJson.project_id;
   }
 
@@ -191,9 +191,12 @@ export const GoogleApiConfig: ProviderAPIConfig = {
       }
 
       case 'anthropic': {
-        if (mappedFn === 'chatComplete') {
+        if (mappedFn === 'chatComplete' || mappedFn === 'messages') {
           return `${projectRoute}/publishers/${provider}/models/${model}:rawPredict`;
-        } else if (mappedFn === 'stream-chatComplete') {
+        } else if (
+          mappedFn === 'stream-chatComplete' ||
+          mappedFn === 'stream-messages'
+        ) {
           return `${projectRoute}/publishers/${provider}/models/${model}:streamRawPredict`;
         }
       }
