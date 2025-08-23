@@ -27,6 +27,21 @@
       "watchMode": false
     },
     {
+      "type": "node",
+      "internalConsoleOptions": "neverOpen",
+      "request": "launch",
+      "name": "ServerDist",
+      "program": "build/llm_gateway.js",
+      "args": [
+        "--port=30027",
+        "--host=0.0.0.0",
+        "--headless"
+      ],
+      "cwd": "${workspaceFolder}",
+      "stopOnEntry": false,
+      "watchMode": false
+    },
+    {
       "name": "Wrangler debug",
       "type": "node",
       "request": "attach",
