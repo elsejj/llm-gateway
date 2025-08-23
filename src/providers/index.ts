@@ -35,6 +35,7 @@ import PredibaseConfig from './predibase';
 import TritonConfig from './triton/';
 import VoyageConfig from './voyage';
 import QWenConfig from './qwen';
+import ModelScopeConfig from './model-scope';
 import {
   AzureAIInferenceAPIConfig,
   GithubModelAPiConfig,
@@ -105,6 +106,7 @@ const Providers: { [key: string]: ProviderConfigs } = {
   triton: TritonConfig,
   voyage: VoyageConfig,
   qwen: QWenConfig,
+  'model-scope': ModelScopeConfig,
   'azure-ai': AzureAIInferenceAPIConfig,
   github: GithubModelAPiConfig,
   deepbricks: DeepbricksConfig,

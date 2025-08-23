@@ -78,6 +78,7 @@ export const PREDIBASE: string = 'predibase';
 export const TRITON: string = 'triton';
 export const VOYAGE: string = 'voyage';
 export const QWEN = 'qwen';
+export const MODEL_SCOPE = 'model-scope';
 export const GITHUB: string = 'github';
 export const DEEPBRICKS: string = 'deepbricks';
 export const SILICONFLOW: string = 'siliconflow';
@@ -144,6 +145,7 @@ export const VALID_PROVIDERS = [
   TRITON,
   VOYAGE,
   QWEN,
+  MODEL_SCOPE,
   AZURE_AI_INFERENCE,
   GITHUB,
   DEEPBRICKS,

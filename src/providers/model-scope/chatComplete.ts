@@ -1,4 +1,4 @@
-import { X_AI } from '../../globals';
+import { MODEL_SCOPE } from '../../globals';
 
 import {
   ChatCompletionResponse,
@@ -10,11 +10,11 @@ import {
   generateInvalidProviderResponseError,
 } from '../utils';
 
-export const XAiChatCompleteConfig: ProviderConfig = {
+export const ModelScopeChatCompleteConfig: ProviderConfig = {
   model: {
     param: 'model',
     required: true,
-    default: 'grok-beta',
+    default: 'Qwen/Qwen3-480B-A35B-Instruct',
   },
   messages: {
     param: 'messages',
@@ -23,12 +23,11 @@ export const XAiChatCompleteConfig: ProviderConfig = {
   max_tokens: {
     param: 'max_tokens',
     default: 100,
-    min: 0,
-  },
-  max_completion_tokens: {
-    param: 'max_tokens',
-    default: 100,
-    min: 0,
+    min: 1,
+    max: 65536,
+    transform: (value: number) => {
+      return Math.min(value, 65536);
+    },
   },
   temperature: {
     param: 'temperature',
@@ -78,11 +77,11 @@ export const XAiChatCompleteConfig: ProviderConfig = {
   },
 };
 
-interface XAiChatCompleteResponse extends ChatCompletionResponse {
+interface ModelScopeChatCompleteResponse extends ChatCompletionResponse {
   id: string;
   object: string;
   created: number;
-  model: string;
+  model: 'ModelScope-plus' | 'ModelScope-max' | 'ModelScope-turbo' | 'ModelScope-long';
   usage: {
     prompt_tokens: number;
     completion_tokens: number;
@@ -90,7 +89,7 @@ interface XAiChatCompleteResponse extends ChatCompletionResponse {
   };
 }
 
-export interface XAiErrorResponse {
+export interface ModelScopeErrorResponse {
   object: string;
   message: string;
   type: string;
@@ -98,7 +97,7 @@ export interface XAiErrorResponse {
   code: string;
 }
 
-interface XAiStreamChunk {
+interface ModelScopeStreamChunk {
   id: string;
   object: string;
   created: number;
@@ -118,8 +117,8 @@ interface XAiStreamChunk {
   };
 }
 
-export const XAiChatCompleteResponseTransform: (
-  response: XAiChatCompleteResponse | XAiErrorResponse,
+export const ModelScopeChatCompleteResponseTransform: (
+  response: ModelScopeChatCompleteResponse | ModelScopeErrorResponse,
   responseStatus: number
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
   if ('message' in response && responseStatus !== 200) {
@@ -130,7 +129,7 @@ export const XAiChatCompleteResponseTransform: (
         param: response.param,
         code: response.code,
       },
-      X_AI
+      MODEL_SCOPE
     );
   }
 
@@ -140,7 +139,7 @@ export const XAiChatCompleteResponseTransform: (
       object: response.object,
       created: response.created,
       model: response.model,
-      provider: X_AI,
+      provider: MODEL_SCOPE,
       choices: response.choices.map((c) => ({
         index: c.index,
         message: {
@@ -157,10 +156,10 @@ export const XAiChatCompleteResponseTransform: (
     };
   }
 
-  return generateInvalidProviderResponseError(response, X_AI);
+  return generateInvalidProviderResponseError(response, MODEL_SCOPE);
 };
 
-export const XAiChatCompleteStreamChunkTransform: (
+export const ModelScopeChatCompleteStreamChunkTransform: (
   response: string
 ) => string = (responseChunk) => {
   let chunk = responseChunk.trim();
@@ -169,15 +168,15 @@ export const XAiChatCompleteStreamChunkTransform: (
   if (chunk === '[DONE]') {
     return `data: ${chunk}\n\n`;
   }
-  const parsedChunk: XAiStreamChunk = JSON.parse(chunk);
+  const parsedChunk: ModelScopeStreamChunk = JSON.parse(chunk);
   return (
     `data: ${JSON.stringify({
       id: parsedChunk.id,
       object: parsedChunk.object,
       created: parsedChunk.created,
       model: parsedChunk.model,
-      provider: X_AI,
-      choices: parsedChunk.choices?.map((c) => {
+      provider: MODEL_SCOPE,
+      choices: parsedChunk.choices?.slice(0, 1).map((c) => {
         return {
           index: c.index,
           delta: c.delta,
