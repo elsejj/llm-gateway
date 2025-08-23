@@ -81,7 +81,11 @@ interface ModelScopeChatCompleteResponse extends ChatCompletionResponse {
   id: string;
   object: string;
   created: number;
-  model: 'ModelScope-plus' | 'ModelScope-max' | 'ModelScope-turbo' | 'ModelScope-long';
+  model:
+    | 'ModelScope-plus'
+    | 'ModelScope-max'
+    | 'ModelScope-turbo'
+    | 'ModelScope-long';
   usage: {
     prompt_tokens: number;
     completion_tokens: number;
