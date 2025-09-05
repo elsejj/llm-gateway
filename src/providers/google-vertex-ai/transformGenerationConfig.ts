@@ -57,6 +57,11 @@ export function transformGenerationConfig(params: Params) {
     thinkingConfig['thinking_budget'] = budget_tokens;
     generationConfig['thinking_config'] = thinkingConfig;
   }
+  if (params.modalities) {
+    generationConfig['responseModalities'] = params.modalities.map((modality) =>
+      modality.toUpperCase()
+    );
+  }
 
   if (params?.reasoning_effort) {
     const thinkingConfig: Record<string, any> = {};
