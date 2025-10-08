@@ -69,7 +69,7 @@ export const GoogleApiConfig: ProviderAPIConfig = {
     return `https://${vertexRegion}-aiplatform.googleapis.com`;
   },
   //@ts-ignore
-  headers: async ({ c, providerOptions }) => {
+  headers: async ({ c, providerOptions, gatewayRequestBody }) => {
     const { apiKey, vertexServiceAccountJson } = providerOptions;
     let authToken = apiKey;
     if (vertexServiceAccountJson) {
@@ -90,9 +90,16 @@ export const GoogleApiConfig: ProviderAPIConfig = {
       }
     }
 
+    const anthropicBeta =
+      providerOptions?.['anthropicBeta'] ??
+      gatewayRequestBody?.['anthropic_beta'];
+
     return {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${authToken}`,
+      ...(anthropicBeta && {
+        'anthropic-beta': anthropicBeta,
+      }),
     };
   },
   getEndpoint: ({
@@ -199,6 +206,8 @@ export const GoogleApiConfig: ProviderAPIConfig = {
           mappedFn === 'stream-messages'
         ) {
           return `${projectRoute}/publishers/${provider}/models/${model}:streamRawPredict`;
+        } else if (mappedFn === 'messagesCountTokens') {
+          return `${projectRoute}/publishers/${provider}/models/count-tokens:rawPredict`;
         }
       }
 
