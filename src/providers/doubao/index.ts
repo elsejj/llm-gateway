@@ -28,35 +28,22 @@ const DouBaoConfig: ProviderConfigs = {
     [],
     {},
     {
-      messages: {
-        param: 'messages',
-        default: '',
-        transform: (params: Params) => {
-          return params.messages?.map((message: Message) => {
-            if (
-              message.role === 'tool' &&
-              Array.isArray(message.content) &&
-              message.content.length > 0
-            ) {
-              // doubao only supports string content
-              message.content = message.content[0].text || '';
-            }
-            return message;
-          });
-        },
-      },
       reasoning_effort: {
-        param: 'thinking',
+        param: 'reasoning_effort',
         default: null,
         transform: (params: Params) => {
           if (params?.reasoning_effort) {
             switch (params.reasoning_effort) {
               case 'none':
-                return { type: 'disabled' };
-              case 'auto':
-                return { type: 'auto' };
-              default:
-                return { type: 'enabled' };
+                return 'minimal';
+              case 'low':
+              case 'medium':
+              case 'high':
+                if (params.thinking?.type != 'enabled') {
+                  //@ts-ignore, https://www.volcengine.com/docs/82379/1449737#0002
+                  params.thinking = { type: 'enabled' };
+                }
+                return params.reasoning_effort;
             }
           }
           return null;
