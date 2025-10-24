@@ -1,21 +1,14 @@
+import { ZHIPU } from '../../globals';
+import { chatCompleteParams, responseTransformers } from '../open-ai-base';
 import { ProviderConfigs } from '../types';
 import ZhipuAPIConfig from './api';
-import {
-  ZhipuChatCompleteConfig,
-  ZhipuChatCompleteResponseTransform,
-  ZhipuChatCompleteStreamChunkTransform,
-} from './chatComplete';
-import { ZhipuEmbedConfig, ZhipuEmbedResponseTransform } from './embed';
 
 const ZhipuConfig: ProviderConfigs = {
-  chatComplete: ZhipuChatCompleteConfig,
-  embed: ZhipuEmbedConfig,
+  chatComplete: chatCompleteParams([], { model: 'glm-4.5-flash' }),
   api: ZhipuAPIConfig,
-  responseTransforms: {
-    chatComplete: ZhipuChatCompleteResponseTransform,
-    'stream-chatComplete': ZhipuChatCompleteStreamChunkTransform,
-    embed: ZhipuEmbedResponseTransform,
-  },
+  responseTransforms: responseTransformers(ZHIPU, {
+    chatComplete: true,
+  }),
 };
 
 export default ZhipuConfig;

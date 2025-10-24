@@ -9,8 +9,6 @@ const ZhipuAPIConfig: ProviderAPIConfig = {
     switch (fn) {
       case 'chatComplete':
         return '/chat/completions';
-      case 'embed':
-        return '/embeddings';
       default:
         return '';
     }
