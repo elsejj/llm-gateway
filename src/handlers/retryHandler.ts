@@ -164,7 +164,9 @@ export const retryRequest = async (
             return;
           }
           lastResponse = response;
-          console.log(`${new Date().toISOString()} request done ${url}`);
+          console.log(
+            `${new Date().toISOString()} request done ${url} ${response.status}`
+          );
         } catch (error: any) {
           if (attempt >= retryCount + 1) {
             bail(error);
