@@ -57,8 +57,8 @@ export function transformGenerationConfig(params: Params) {
     const thinkingConfig: Record<string, any> = {};
     thinkingConfig['include_thoughts'] =
       type === 'enabled' && budget_tokens ? true : false;
-    thinkingConfig['thinking_budget'] = budget_tokens;
-    generationConfig['thinking_config'] = thinkingConfig;
+    thinkingConfig['thinkingBudget'] = budget_tokens;
+    generationConfig['thinkingConfig'] = thinkingConfig;
   }
   if (params.modalities) {
     generationConfig['responseModalities'] = params.modalities.map((modality) =>
@@ -71,23 +71,37 @@ export function transformGenerationConfig(params: Params) {
     switch (params.reasoning_effort) {
       case 'none':
       case 'auto':
+        thinkingConfig['includeThoughts'] = true;
         break;
       // https://ai.google.dev/gemini-api/docs/openai#thinking
       case 'low':
-        thinkingConfig['include_thoughts'] = true;
-        thinkingConfig['thinking_budget'] = 1000;
+      case 'minimal':
+        thinkingConfig['includeThoughts'] = true;
+        if (params.model?.includes('gemini-3-')) {
+          thinkingConfig['thinkingLevel'] = 'low';
+        } else {
+          thinkingConfig['thinkingBudget'] = 1024;
+        }
         break;
       case 'medium':
-        thinkingConfig['include_thoughts'] = true;
-        thinkingConfig['thinking_budget'] = 8000;
+        thinkingConfig['includeThoughts'] = true;
+        if (params.model?.includes('gemini-3-')) {
+          thinkingConfig['thinkingLevel'] = 'medium';
+        } else {
+          thinkingConfig['thinkingBudget'] = 8192;
+        }
         break;
       case 'high':
-        thinkingConfig['include_thoughts'] = true;
-        thinkingConfig['thinking_budget'] = 24000;
+        thinkingConfig['includeThoughts'] = true;
+        if (params.model?.includes('gemini-3-')) {
+          thinkingConfig['thinkingLevel'] = 'high';
+        } else {
+          thinkingConfig['thinkingBudget'] = 24576;
+        }
         break;
     }
     if (Object.keys(thinkingConfig).length > 0) {
-      generationConfig['thinking_config'] = thinkingConfig;
+      generationConfig['thinkingConfig'] = thinkingConfig;
     }
   }
 

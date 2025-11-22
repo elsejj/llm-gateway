@@ -694,6 +694,10 @@ export const GoogleChatCompleteStreamChunkTransform: (
           message = {
             role: 'assistant',
             content,
+            reasoning_content:
+              contentBlocks.length && contentBlocks[0].delta.reasoning_content
+                ? contentBlocks[0].delta.reasoning_content
+                : undefined,
             ...(!strictOpenAiCompliance &&
               contentBlocks.length && { content_blocks: contentBlocks }),
           };
@@ -752,7 +756,6 @@ export const GoogleChatCompleteStreamChunkTransform: (
       usage: usageMetadata,
     }),
   };
-
   return `data: ${JSON.stringify(dataChunk)}\n\n`;
 };
 
