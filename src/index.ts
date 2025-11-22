@@ -77,7 +77,6 @@ app.use(
   })
 );
 
-const runtime = getRuntimeKey();
 app.use('*', (c, next) => {
   if (runtime === 'bun') {
     return bunCompress()(c, next);

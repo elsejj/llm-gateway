@@ -85,6 +85,7 @@ export const retryRequest = async (
 
   try {
     await retry(
+      // @ts-ignore
       async (bail: any, attempt: number, rateLimiter: any) => {
         try {
           console.log(`${new Date().toISOString()} request start ${url}`);
