@@ -66,6 +66,7 @@ export interface Options {
   adAuth?: string;
   azureAuthMode?: string;
   azureManagedClientId?: string;
+  azureWorkloadClientId?: string;
   azureEntraClientId?: string;
   azureEntraClientSecret?: string;
   azureEntraTenantId?: string;
@@ -153,6 +154,7 @@ export interface Options {
   /** Anthropic specific headers */
   anthropicBeta?: string;
   anthropicVersion?: string;
+  anthropicApiKey?: string;
 
   /** Fireworks finetune required fields */
   fireworksAccountId?: string;
@@ -265,6 +267,7 @@ export interface ToolCall {
     name: string;
     arguments: string;
     description?: string;
+    thought_signature?: string;
   };
 }
 
