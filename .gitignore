@@ -158,3 +158,4 @@ nohup.out
 
 plugins/**/.parameters.json
 src/handlers/tests/.creds.json
+.cursor/

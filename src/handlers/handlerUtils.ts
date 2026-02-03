@@ -16,6 +16,7 @@ import {
   SAGEMAKER,
   FIREWORKS_AI,
   CORTEX,
+  ORACLE,
 } from '../globals';
 import { endpointStrings } from '../providers/types';
 import { Options, Params, StrategyModes, Targets } from '../types/requestBody';
@@ -255,6 +256,7 @@ export function convertHooksShorthand(
       'id',
       'type',
       'guardrail_version_id',
+      'sequential',
     ].forEach((key) => {
       if (hook.hasOwnProperty(key)) {
         hooksObject[key] = hook[key];
@@ -859,6 +861,7 @@ export function constructConfigFromRequestHeaders(
     openaiBeta:
       requestHeaders[`x-${POWERED_BY}-openai-beta`] ||
       requestHeaders[`openai-beta`],
+    azureEntraScope: requestHeaders[`x-${POWERED_BY}-azure-entra-scope`],
   };
 
   const stabilityAiConfig = {
@@ -883,6 +886,7 @@ export function constructConfigFromRequestHeaders(
     azureEntraTenantId: requestHeaders[`x-${POWERED_BY}-azure-entra-tenant-id`],
     azureEntraScope: requestHeaders[`x-${POWERED_BY}-azure-entra-scope`],
     azureExtraParameters: requestHeaders[`x-${POWERED_BY}-azure-extra-params`],
+    anthropicVersion: requestHeaders[`x-${POWERED_BY}-anthropic-version`],
   };
 
   const awsConfig = {
@@ -906,6 +910,12 @@ export function constructConfigFromRequestHeaders(
       requestHeaders[
         `x-${POWERED_BY}-amz-server-side-encryption-aws-kms-key-id`
       ],
+    anthropicBeta:
+      requestHeaders[`x-${POWERED_BY}-anthropic-beta`] ||
+      requestHeaders[`anthropic-beta`],
+    anthropicVersion:
+      requestHeaders[`x-${POWERED_BY}-anthropic-version`] ||
+      requestHeaders[`anthropic-version`],
   };
 
   const sagemakerConfig = {
@@ -959,6 +969,9 @@ export function constructConfigFromRequestHeaders(
     anthropicBeta:
       requestHeaders[`x-${POWERED_BY}-anthropic-beta`] ||
       requestHeaders[`anthropic-beta`],
+    anthropicVersion:
+      requestHeaders[`x-${POWERED_BY}-anthropic-version`] ||
+      requestHeaders[`anthropic-version`],
   };
 
   const fireworksConfig = {
@@ -997,6 +1010,20 @@ export function constructConfigFromRequestHeaders(
 
   const cortexConfig = {
     snowflakeAccount: requestHeaders[`x-${POWERED_BY}-snowflake-account`],
+  };
+
+  const oracleConfig = {
+    oracleApiVersion: requestHeaders[`x-${POWERED_BY}-oracle-api-version`],
+    oracleRegion: requestHeaders[`x-${POWERED_BY}-oracle-region`],
+    oracleCompartmentId:
+      requestHeaders[`x-${POWERED_BY}-oracle-compartment-id`],
+    oracleServingMode: requestHeaders[`x-${POWERED_BY}-oracle-serving-mode`],
+    oracleTenancy: requestHeaders[`x-${POWERED_BY}-oracle-tenancy`],
+    oracleUser: requestHeaders[`x-${POWERED_BY}-oracle-user`],
+    oracleFingerprint: requestHeaders[`x-${POWERED_BY}-oracle-fingerprint`],
+    oraclePrivateKey: requestHeaders[`x-${POWERED_BY}-oracle-private-key`],
+    oracleKeyPassphrase:
+      requestHeaders[`x-${POWERED_BY}-oracle-key-passphrase`],
   };
 
   const defaultsConfig = {
@@ -1105,6 +1132,12 @@ export function constructConfigFromRequestHeaders(
           ...cortexConfig,
         };
       }
+      if (parsedConfigJson.provider === ORACLE) {
+        parsedConfigJson = {
+          ...parsedConfigJson,
+          ...oracleConfig,
+        };
+      }
     }
     return convertKeysToCamelCase(parsedConfigJson, [
       'override_params',
@@ -1156,6 +1189,7 @@ export function constructConfigFromRequestHeaders(
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === FIREWORKS_AI &&
       fireworksConfig),
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === CORTEX && cortexConfig),
+    ...(requestHeaders[`x-${POWERED_BY}-provider`] === ORACLE && oracleConfig),
   };
 }
 

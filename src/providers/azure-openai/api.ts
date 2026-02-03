@@ -23,10 +23,15 @@ const AzureOpenAIAPIConfig: ProviderAPIConfig = {
     }
 
     if (azureAuthMode === 'entra') {
-      const { azureEntraTenantId, azureEntraClientId, azureEntraClientSecret } =
-        providerOptions;
+      const {
+        azureEntraTenantId,
+        azureEntraClientId,
+        azureEntraClientSecret,
+        azureEntraScope,
+      } = providerOptions;
       if (azureEntraTenantId && azureEntraClientId && azureEntraClientSecret) {
-        const scope = 'https://cognitiveservices.azure.com/.default';
+        const scope =
+          azureEntraScope || 'https://cognitiveservices.azure.com/.default';
         const accessToken = await getAccessTokenFromEntraId(
           azureEntraTenantId,
           azureEntraClientId,
@@ -39,8 +44,9 @@ const AzureOpenAIAPIConfig: ProviderAPIConfig = {
       }
     }
     if (azureAuthMode === 'managed') {
-      const { azureManagedClientId } = providerOptions;
-      const resource = 'https://cognitiveservices.azure.com/';
+      const { azureManagedClientId, azureEntraScope } = providerOptions;
+      const resource =
+        azureEntraScope || 'https://cognitiveservices.azure.com/';
       const accessToken = await getAzureManagedIdentityToken(
         resource,
         azureManagedClientId
@@ -51,7 +57,7 @@ const AzureOpenAIAPIConfig: ProviderAPIConfig = {
     }
     // `AZURE_FEDERATED_TOKEN_FILE` is injected by runtime, skipping serverless for now.
     if (azureAuthMode === 'workload' && runtime === 'node') {
-      const { azureWorkloadClientId } = providerOptions;
+      const { azureWorkloadClientId, azureEntraScope } = providerOptions;
 
       const authorityHost = Environment(c).AZURE_AUTHORITY_HOST;
       const tenantId = Environment(c).AZURE_TENANT_ID;
@@ -63,7 +69,8 @@ const AzureOpenAIAPIConfig: ProviderAPIConfig = {
         const federatedToken = fs.readFileSync(federatedTokenFile, 'utf8');
 
         if (federatedToken) {
-          const scope = 'https://cognitiveservices.azure.com/.default';
+          const scope =
+            azureEntraScope || 'https://cognitiveservices.azure.com/.default';
           const accessToken = await getAzureWorkloadIdentityToken(
             authorityHost,
             tenantId,
@@ -116,39 +123,51 @@ const AzureOpenAIAPIConfig: ProviderAPIConfig = {
     }
 
     const urlObj = new URL(gatewayRequestURL);
-    const pathname = urlObj.pathname.replace('/v1', '');
     const searchParams = urlObj.searchParams;
     if (apiVersion) {
       searchParams.set('api-version', apiVersion);
     }
 
+    let prefix = `/deployments/${deploymentId}`;
+    const isAzureV1API = apiVersion?.trim() === 'v1';
+
+    const pathname = !isAzureV1API
+      ? urlObj.pathname.replace('/v1', '')
+      : urlObj.pathname;
+
+    if (isAzureV1API) {
+      prefix = '/v1';
+      searchParams.delete('api-version');
+    }
+
     switch (mappedFn) {
       case 'complete': {
-        return `/deployments/${deploymentId}/completions?api-version=${apiVersion}`;
+        return `${prefix}/completions?${searchParams.toString()}`;
       }
       case 'chatComplete': {
-        return `/deployments/${deploymentId}/chat/completions?api-version=${apiVersion}`;
+        return `${prefix}/chat/completions?${searchParams.toString()}`;
       }
       case 'embed': {
-        return `/deployments/${deploymentId}/embeddings?api-version=${apiVersion}`;
+        return `${prefix}/embeddings?${searchParams.toString()}`;
       }
       case 'imageGenerate': {
-        return `/deployments/${deploymentId}/images/generations?api-version=${apiVersion}`;
+        return `${prefix}/images/generations?${searchParams.toString()}`;
       }
       case 'imageEdit': {
-        return `/deployments/${deploymentId}/images/edits?api-version=${apiVersion}`;
+        return `${prefix}/images/edits?${searchParams.toString()}`;
       }
       case 'createSpeech': {
-        return `/deployments/${deploymentId}/audio/speech?api-version=${apiVersion}`;
+        return `${prefix}/audio/speech?${searchParams.toString()}`;
       }
       case 'createTranscription': {
-        return `/deployments/${deploymentId}/audio/transcriptions?api-version=${apiVersion}`;
+        return `${prefix}/audio/transcriptions?${searchParams.toString()}`;
       }
       case 'createTranslation': {
-        return `/deployments/${deploymentId}/audio/translations?api-version=${apiVersion}`;
+        return `${prefix}/audio/translations?${searchParams.toString()}`;
       }
       case 'realtime': {
-        return `/realtime?api-version=${apiVersion}&deployment=${deploymentId}`;
+        searchParams.set('deployment', deploymentId || '');
+        return `${isAzureV1API ? prefix : ''}/realtime?${searchParams.toString()}`;
       }
       case 'createModelResponse': {
         return `${pathname}?${searchParams.toString()}`;
@@ -175,14 +194,20 @@ const AzureOpenAIAPIConfig: ProviderAPIConfig = {
       case 'retrieveBatch':
       case 'cancelBatch':
       case 'listBatches':
-        return `${pathname}?api-version=${apiVersion}`;
+        return `${pathname}?${searchParams.toString()}`;
       default:
         return '';
     }
   },
   getProxyEndpoint: ({ reqPath, reqQuery, providerOptions }) => {
     const { apiVersion } = providerOptions;
-    if (!apiVersion) return `${reqPath}${reqQuery}`;
+    const defaultEndpoint = `${reqPath}${reqQuery}`;
+    if (!apiVersion) {
+      return defaultEndpoint; // append /v1 to the request path
+    }
+    if (apiVersion?.trim() === 'v1') {
+      return `/v1${reqPath}${reqQuery}`;
+    }
     if (!reqQuery?.includes('api-version')) {
       let _reqQuery = reqQuery;
       if (!reqQuery) {

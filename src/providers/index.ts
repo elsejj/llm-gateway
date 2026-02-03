@@ -75,6 +75,10 @@ import CometAPIConfig from './cometapi';
 import ZAIConfig from './z-ai';
 import MatterAIConfig from './matterai';
 import ModalConfig from './modal';
+import OracleConfig from './oracle';
+import IOIntelligenceConfig from './iointelligence';
+import AIBadgrConfig from './aibadgr';
+import OVHcloudConfig from './ovhcloud';
 
 const Providers: { [key: string]: ProviderConfigs } = {
   openai: OpenAIConfig,
@@ -150,6 +154,10 @@ const Providers: { [key: string]: ProviderConfigs } = {
   tripo3d: Tripo3DConfig,
   modal: ModalConfig,
   'z-ai': ZAIConfig,
+  oracle: OracleConfig,
+  iointelligence: IOIntelligenceConfig,
+  aibadgr: AIBadgrConfig,
+  ovhcloud: OVHcloudConfig,
 };
 
 export default Providers;
