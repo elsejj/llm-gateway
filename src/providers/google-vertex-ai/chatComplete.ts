@@ -368,10 +368,6 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
     param: 'generationConfig',
     transform: (params: Params) => transformGenerationConfig(params),
   },
-  reasoning_effort: {
-    param: 'generationConfig',
-    transform: (params: Params) => transformGenerationConfig(params),
-  },
 };
 
 interface AnthorpicTextContentItem {
