@@ -36,20 +36,17 @@ const DeepSeekConfig: ProviderConfigs = {
             switch (params.reasoning_effort) {
               case 'none':
                 //@ts-ignore
-                params.thinking = { type: 'disable' };
+                params.thinking = { type: 'disabled' };
                 return null;
               case 'low':
               case 'medium':
+                return 'high';
               case 'high':
-                if (params.thinking?.type != 'enabled') {
-                  //@ts-ignore, https://www.volcengine.com/docs/82379/1449737#0002
-                  params.thinking = { type: 'enabled' };
-                }
-                return params.reasoning_effort;
+                return 'xhigh';
             }
           } else {
             //@ts-ignore
-            params.thinking = { type: 'disable' };
+            params.thinking = { type: 'disabled' };
           }
           return null;
         },
