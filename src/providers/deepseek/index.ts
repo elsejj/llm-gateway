@@ -28,6 +28,32 @@ const DeepSeekConfig: ProviderConfigs = {
           });
         },
       },
+      reasoning_effort: {
+        param: 'reasoning_effort',
+        default: null,
+        transform: (params: Params) => {
+          if (params?.reasoning_effort) {
+            switch (params.reasoning_effort) {
+              case 'none':
+                //@ts-ignore
+                params.thinking = { type: 'disable' };
+                return null;
+              case 'low':
+              case 'medium':
+              case 'high':
+                if (params.thinking?.type != 'enabled') {
+                  //@ts-ignore, https://www.volcengine.com/docs/82379/1449737#0002
+                  params.thinking = { type: 'enabled' };
+                }
+                return params.reasoning_effort;
+            }
+          } else {
+            //@ts-ignore
+            params.thinking = { type: 'disable' };
+          }
+          return null;
+        },
+      },
     }
   ),
   api: DeepSeekAPIConfig,
