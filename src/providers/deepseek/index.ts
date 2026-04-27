@@ -35,8 +35,6 @@ const DeepSeekConfig: ProviderConfigs = {
           if (params?.reasoning_effort) {
             switch (params.reasoning_effort) {
               case 'none':
-                //@ts-ignore
-                params.thinking = { type: 'disabled' };
                 return null;
               case 'low':
               case 'medium':
@@ -44,11 +42,36 @@ const DeepSeekConfig: ProviderConfigs = {
               case 'high':
                 return 'xhigh';
             }
-          } else {
-            //@ts-ignore
-            params.thinking = { type: 'disabled' };
           }
           return null;
+        },
+      },
+      thinking: {
+        param: 'thinking',
+        default: (params: Params) => {
+          if (params?.reasoning_effort) {
+            switch (params.reasoning_effort) {
+              case 'none':
+                return { type: 'disabled' };
+              default:
+                return { type: 'enabled' };
+            }
+          } else {
+            return { type: 'disabled' };
+          }
+        },
+        required: true,
+        transform: (params: Params) => {
+          if (params?.reasoning_effort) {
+            switch (params.reasoning_effort) {
+              case 'none':
+                return { type: 'disabled' };
+              default:
+                return { type: 'enabled' };
+            }
+          } else {
+            return { type: 'disabled' };
+          }
         },
       },
     }
